@@ -1,3 +1,4 @@
+// Select DOM elements
 const fileInput = document.getElementById("resume-upload");
 const uploadLabel = document.querySelector(".upload-text");
 const nextButton = document.getElementById("next-button");
@@ -61,10 +62,12 @@ nextButton.addEventListener("click", async () => {
     try {
         const fileBase64 = await fileToBase64(file);
         const fileType = file.name.split(".").pop().toLowerCase(); // Extract file extension
+
         if (fileType !== "pdf") {
             alert("Only PDF files are supported. Please upload a valid PDF.");
             return;
         }
+
         await sendResumeData(fileBase64, fileType);
     } catch (error) {
         console.error("Error reading file:", error);
