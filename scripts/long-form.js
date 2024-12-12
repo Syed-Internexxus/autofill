@@ -65,6 +65,13 @@ document.addEventListener("DOMContentLoaded", function () {
         const removeButton = document.createElement("button");
         removeButton.textContent = "×";
         removeButton.classList.add("remove-skill");
+        removeButton.style.padding = "0 5px";
+        removeButton.style.border = "none";
+        removeButton.style.backgroundColor = "transparent";
+        removeButton.style.cursor = "pointer";
+        removeButton.style.color = "red";
+        removeButton.style.fontSize = "16px";
+
         removeButton.addEventListener("click", () => {
             skillsTagsContainer.removeChild(tag);
         });
@@ -73,51 +80,54 @@ document.addEventListener("DOMContentLoaded", function () {
         skillsTagsContainer.appendChild(tag);
     }
 
-    // Add functionality for Add, Save, and Delete buttons in Education and Work sections
+    // Add functionality for Add, Save, and Delete buttons in Education, Work Experience, and Links sections
     document.body.addEventListener("click", (event) => {
         const target = event.target;
 
         // Add new education entry
         if (target.classList.contains("add-education-btn")) {
-            const educationForm = document.querySelector(".education-form");
-            const newForm = educationForm.cloneNode(true);
-            newForm.querySelectorAll("input, textarea").forEach((input) => {
-                input.value = "";
-            });
-            educationForm.parentNode.insertBefore(newForm, target);
+            const educationFormContainer = document.querySelector(".education-form");
+            if (!educationFormContainer.querySelector("input")) {
+                addEducationSection();
+            }
         }
 
         // Add new work experience entry
         if (target.classList.contains("add-experience-btn")) {
-            const workForm = document.querySelector(".work-form");
-            const newForm = workForm.cloneNode(true);
-            newForm.querySelectorAll("input, textarea").forEach((input) => {
-                input.value = "";
-            });
-            workForm.parentNode.insertBefore(newForm, target);
+            const workFormContainer = document.querySelector(".work-form");
+            if (!workFormContainer.querySelector("input")) {
+                addExperienceSection();
+            }
+        }
+
+        // Add new link entry
+        if (target.classList.contains("add-link-btn")) {
+            const linkFormContainer = document.querySelector(".link-form");
+            if (!linkFormContainer.querySelector("input")) {
+                addLinkSection();
+            }
         }
 
         // Delete entry
         if (target.classList.contains("delete-btn")) {
-            const parentForm = target.closest(".education-form, .work-form");
+            const parentForm = target.closest(".education-form, .work-form, .link-form");
             if (parentForm) {
                 parentForm.remove();
             }
         }
 
-        // Save entry (for demonstration purposes, log the saved data)
+        // Save entry (make fields non-editable in Links section)
         if (target.classList.contains("save-btn")) {
-            const parentForm = target.closest(".education-form, .work-form");
+            const parentForm = target.closest(".link-form");
             if (parentForm) {
-                const formData = {};
-                parentForm.querySelectorAll("input, textarea").forEach((input) => {
-                    formData[input.name || input.id] = input.value;
+                parentForm.querySelectorAll("input, select").forEach((input) => {
+                    input.setAttribute("readonly", true);
+                    input.setAttribute("disabled", true);
                 });
-                console.log("Saved data:", formData);
+                target.remove(); // Remove the save button
             }
         }
     });
-
     // Function to populate fields with response data
     const populateFields = (data) => {
         // Personal Details
@@ -148,40 +158,72 @@ document.addEventListener("DOMContentLoaded", function () {
             data["core_skills"].split(",").forEach((skill) => addSkillTag(skill.trim()));
         }
     };
-
-    const addEducationSection = (edu) => {
+    // Function to add a new education section
+    const addEducationSection = () => {
         const template = `
-            <div class="form-grid">
-                <input type="text" placeholder="School Name" value="${edu.school_name || ""}">
-                <input type="text" placeholder="Degree" value="${edu.degree || ""}">
-            </div>
-            <div class="form-grid">
-                <input type="month" value="${edu.start_date || ""}">
-                <input type="month" value="${edu.end_date || ""}">
-                <input type="text" placeholder="GPA" value="${edu.gpa || ""}">
+            <div class="education-entry">
+                <div class="form-grid">
+                    <input type="text" placeholder="School Name">
+                    <input type="text" placeholder="Degree">
+                </div>
+                <div class="form-grid">
+                    <input type="month">
+                    <input type="month">
+                    <input type="text" placeholder="GPA">
+                </div>
+                <div class="form-grid">
+                    <textarea placeholder="Details"></textarea>
+                </div>
+                <button class="delete-btn">Delete</button>
             </div>`;
-        document.querySelector(".education-form").insertAdjacentHTML("beforeend", template);
+        const educationFormContainer = document.querySelector(".education-form");
+        educationFormContainer.insertAdjacentHTML("beforeend", template);
     };
 
-    const addExperienceSection = (exp) => {
+    // Function to add a new work experience section
+    const addExperienceSection = () => {
         const template = `
-            <div class="form-grid">
-                <input type="text" placeholder="Company Name" value="${exp.company || ""}">
-                <input type="text" placeholder="Job Title" value="${exp.title || ""}">
+            <div class="work-entry">
+                <div class="form-grid">
+                    <input type="text" placeholder="Company Name">
+                    <input type="text" placeholder="Job Title">
+                </div>
+                <div class="form-grid">
+                    <input type="month">
+                    <input type="month">
+                    <input type="text" placeholder="Location">
+                </div>
+                <div class="form-grid">
+                    <textarea placeholder="Description of Responsibilities"></textarea>
+                </div>
+                <button class="delete-btn">Delete</button>
             </div>`;
-        document.querySelector(".work-form").insertAdjacentHTML("beforeend", template);
+        const workFormContainer = document.querySelector(".work-form");
+        workFormContainer.insertAdjacentHTML("beforeend", template);
     };
 
-    const addLinkSection = (link) => {
+    // Function to add a new link section
+    const addLinkSection = () => {
         const template = `
-            <div class="form-grid">
-                <input type="text" value="${link.type || ""}">
-                <input type="url" value="${link.url || ""}">
+            <div class="link-entry">
+                <div class="form-grid">
+                    <select>
+                        <option value="" disabled selected>Select Link Type</option>
+                        <option value="Portfolio">Portfolio</option>
+                        <option value="LinkedIn">LinkedIn</option>
+                        <option value="GitHub">GitHub</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <input type="url" placeholder="Link URL">
+                </div>
+                <button class="save-btn">Save</button>
+                <button class="delete-btn">Delete</button>
             </div>`;
-        document.querySelector(".link-form").insertAdjacentHTML("beforeend", template);
+        const linkFormContainer = document.querySelector(".link-form");
+        linkFormContainer.insertAdjacentHTML("beforeend", template);
     };
 
-    // Fetch data from session storage
+    // Populate fields with data from sessionStorage
     const resumeData = JSON.parse(sessionStorage.getItem("resumeData"));
     if (resumeData) {
         populateFields(resumeData);
