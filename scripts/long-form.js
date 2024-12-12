@@ -498,16 +498,14 @@ document.addEventListener("DOMContentLoaded", function () {
     function displaySummary(data) {
         const profileForm = document.querySelector(".profile-form");
         const summaryView = document.querySelector(".summary-view");
-        if (!summaryView) return;
-
-        // Hide all form sections
-        const formSections = profileForm.querySelectorAll(".form-section");
-        formSections.forEach(sec => sec.style.display = "none");
-
+        if (!summaryView || !profileForm) return;
+    
+        // Add summary-active class to hide sidebar
+        profileForm.classList.add("summary-active");
+    
         let html = `
             <h2>Current Information</h2>
             <button class="edit-information">Edit information</button>
-
             <h3>Personal Information</h3>
             <p><strong>First Name:</strong> ${data.firstName}</p>
             <p><strong>Last Name:</strong> ${data.lastName}</p>
@@ -516,10 +514,10 @@ document.addEventListener("DOMContentLoaded", function () {
             <p><strong>Primary Email:</strong> ${data.primaryEmail}</p>
             <p><strong>Backup Email:</strong> ${data.backupEmail}</p>
             <p><strong>Location:</strong> ${data.location}</p>
-
+            
             <h3>Education Details</h3>
         `;
-
+    
         data.educations.forEach(edu => {
             html += `
                 <p><strong>${edu.degree}</strong>, ${edu.school_name}</p>
@@ -527,7 +525,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <p>${edu.details}</p>
             `;
         });
-
+    
         html += `<h3>Work Experience</h3>`;
         data.experiences.forEach(exp => {
             html += `
@@ -536,15 +534,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 <p>${exp.description}</p>
             `;
         });
-
+    
         html += `<h3>Skills</h3>`;
         html += `<p>${data.skills.join(", ")}</p>`;
-
+    
         html += `<h3>Links</h3>`;
         data.links.forEach(link => {
             html += `<p><strong>${link.type}:</strong> ${link.url}</p>`;
         });
-
+    
         html += `<h3>EEO & Work Authorization</h3>
             <p><strong>Authorized to work in the U.S.:</strong> ${data.authorized}</p>
             <p><strong>Requires Sponsorship:</strong> ${data.requireSponsorship}</p>
@@ -556,15 +554,14 @@ document.addEventListener("DOMContentLoaded", function () {
             <p><strong>Disability Status:</strong> ${data.disability}</p>
             <p><strong>Veteran Status:</strong> ${data.veteranStatus}</p>
         `;
-
+    
         summaryView.innerHTML = html;
         summaryView.style.display = "block";
-
+    
         const editButton = summaryView.querySelector(".edit-information");
         editButton.addEventListener("click", () => {
-            // Hide summary and show forms again if desired
-            summaryView.style.display = "none";
-            formSections.forEach(sec => sec.style.display = "block");
+            // Reload the page on clicking edit information
+            location.reload();
         });
-    }
+    }    
 });

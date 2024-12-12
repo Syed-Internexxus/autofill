@@ -374,7 +374,6 @@ select:valid {
     background: #0056b3;
 }
 
-/* Summary View */
 .summary-view {
     display: none;
     background: #ffffff;
@@ -383,10 +382,10 @@ select:valid {
     padding: 2rem;
     margin-top: 2rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.summary-view h2 {
-    margin-bottom: 1rem;
+    max-width: 600px;
+    width: 90%;
+    margin: 2rem auto; /* Center the summary view */
+    text-align: left;
 }
 
 .edit-information {
@@ -397,10 +396,16 @@ select:valid {
     border-radius: 5px;
     cursor: pointer;
     margin-bottom: 1rem;
+    text-align: center;
 }
 
 .edit-information:hover {
     background: #0056b3;
+}
+
+/* Hide the sidebar when summary is active */
+.profile-form.summary-active .sidebar {
+    display: none;
 }
 
 .summary-view p {
