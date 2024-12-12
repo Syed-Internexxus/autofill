@@ -90,8 +90,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const parentEntry = target.closest(".education-entry, .work-entry, .link-entry, .education-form, .work-form, .link-form");
             if (parentEntry) {
                 // If it's the base form container (no .entry), just clear fields
-                if (parentEntry.classList.contains("education-form") ||
-                    parentEntry.classList.contains("work-form") ||
+                if (parentEntry.classList.contains("education-form") || 
+                    parentEntry.classList.contains("work-form") || 
                     parentEntry.classList.contains("link-form")) {
                     clearFormFields(parentEntry);
                 } else {
@@ -212,7 +212,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 </div>
                 <div>
                     <label>Location</label>
-                    <input type="text" placeholder="San Francisco, CA" value="${exp.location || ""}">
+                    <input type="text" id="work-location" placeholder="San Francisco, CA" value="${exp.location || ""}">
                 </div>
             </div>
             <div class="form-grid full-width">
@@ -230,8 +230,6 @@ document.addEventListener("DOMContentLoaded", function () {
     function addLinkSection(link = {}) {
         const linkForm = document.querySelector(".link-form");
         if (!linkForm) return;
-        // For the first link form that existed in HTML, #link-type and #link-url are set.
-        // For dynamically added links, we won't have IDs, but populateFields only sets the first link entry via IDs.
         const newForm = document.createElement("div");
         newForm.classList.add("link-entry");
         newForm.innerHTML = `
@@ -311,7 +309,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (details) details.value = firstEdu.details || "";
             }
 
-            // Additional entries
+            // Additional entries if more than one
             for (let i = 1; i < educationData.length; i++) {
                 addEducationSection(educationData[i]);
             }
@@ -326,7 +324,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const jobTitle = workForm.querySelector("#job-title");
             const workStart = workForm.querySelector("#start-date");
             const workEnd = workForm.querySelector("#end-date");
-            const workLocation = workForm.querySelector("#location"); // Using #location as in original form
+            const workLocation = workForm.querySelector("#work-location");
             const responsibilities = workForm.querySelector("#responsibilities");
 
             if (firstExp) {
@@ -338,6 +336,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (responsibilities) responsibilities.value = firstExp.description || "";
             }
 
+            // Additional work experiences
             for (let i = 1; i < experienceData.length; i++) {
                 addExperienceSection(experienceData[i]);
             }
@@ -364,6 +363,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
 
+            // Additional links
             for (let i = 1; i < linkData.length; i++) {
                 addLinkSection(linkData[i]);
             }
@@ -500,7 +500,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const summaryView = document.querySelector(".summary-view");
         if (!summaryView || !profileForm) return;
     
-        // Add summary-active class to .profile-form to hide everything except summary
+        // Add summary-active class to hide sidebar
         profileForm.classList.add("summary-active");
     
         let html = `
@@ -556,11 +556,12 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
     
         summaryView.innerHTML = html;
+        summaryView.style.display = "block";
     
         const editButton = summaryView.querySelector(".edit-information");
         editButton.addEventListener("click", () => {
             // Reload the page on clicking edit information
             location.reload();
         });
-    }        
+    }    
 });
