@@ -65,13 +65,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const removeButton = document.createElement("button");
         removeButton.textContent = "×";
         removeButton.classList.add("remove-skill");
-        removeButton.style.padding = "0 5px";
+        removeButton.style.background = "none";
         removeButton.style.border = "none";
-        removeButton.style.backgroundColor = "transparent";
+        removeButton.style.color = "#fff";
         removeButton.style.cursor = "pointer";
-        removeButton.style.color = "red";
-        removeButton.style.fontSize = "16px";
-
+        removeButton.style.marginLeft = "8px";
         removeButton.addEventListener("click", () => {
             skillsTagsContainer.removeChild(tag);
         });
@@ -80,54 +78,65 @@ document.addEventListener("DOMContentLoaded", function () {
         skillsTagsContainer.appendChild(tag);
     }
 
-    // Add functionality for Add, Save, and Delete buttons in Education, Work Experience, and Links sections
+    // Add functionality for Add, Save, and Delete buttons in Education and Work sections
     document.body.addEventListener("click", (event) => {
         const target = event.target;
 
         // Add new education entry
         if (target.classList.contains("add-education-btn")) {
-            const educationFormContainer = document.querySelector(".education-form");
-            if (!educationFormContainer.querySelector("input")) {
-                addEducationSection();
-            }
+            const educationForm = document.querySelector(".education-form");
+            const newForm = educationForm.cloneNode(true);
+            newForm.querySelectorAll("input, textarea").forEach((input) => {
+                input.value = "";
+            });
+            educationForm.parentNode.insertBefore(newForm, target);
         }
 
         // Add new work experience entry
         if (target.classList.contains("add-experience-btn")) {
-            const workFormContainer = document.querySelector(".work-form");
-            if (!workFormContainer.querySelector("input")) {
-                addExperienceSection();
-            }
-        }
-
-        // Add new link entry
-        if (target.classList.contains("add-link-btn")) {
-            const linkFormContainer = document.querySelector(".link-form");
-            if (!linkFormContainer.querySelector("input")) {
-                addLinkSection();
-            }
+            const workForm = document.querySelector(".work-form");
+            const newForm = workForm.cloneNode(true);
+            newForm.querySelectorAll("input, textarea").forEach((input) => {
+                input.value = "";
+            });
+            workForm.parentNode.insertBefore(newForm, target);
         }
 
         // Delete entry
         if (target.classList.contains("delete-btn")) {
-            const parentForm = target.closest(".education-form, .work-form, .link-form");
+            const parentForm = target.closest(".education-form, .work-form");
             if (parentForm) {
                 parentForm.remove();
+                ensureAddButtonVisibility();
             }
         }
 
-        // Save entry (make fields non-editable in Links section)
+        // Save link entry
         if (target.classList.contains("save-btn")) {
             const parentForm = target.closest(".link-form");
             if (parentForm) {
                 parentForm.querySelectorAll("input, select").forEach((input) => {
-                    input.setAttribute("readonly", true);
                     input.setAttribute("disabled", true);
                 });
-                target.remove(); // Remove the save button
+                target.textContent = "Saved";
+                target.setAttribute("disabled", true);
             }
         }
     });
+
+    // Ensure Add button remains visible even when all forms are deleted
+    function ensureAddButtonVisibility() {
+        [".education-form", ".work-form"].forEach((selector) => {
+            const forms = document.querySelectorAll(selector);
+            if (forms.length === 0) {
+                const addButton = document.querySelector(`.add-${selector.split("-")[0]}-btn`);
+                if (addButton) {
+                    addButton.style.display = "block";
+                }
+            }
+        });
+    }
+
     // Function to populate fields with response data
     const populateFields = (data) => {
         // Personal Details
@@ -158,72 +167,40 @@ document.addEventListener("DOMContentLoaded", function () {
             data["core_skills"].split(",").forEach((skill) => addSkillTag(skill.trim()));
         }
     };
-    // Function to add a new education section
-    const addEducationSection = () => {
+
+    const addEducationSection = (edu) => {
         const template = `
-            <div class="education-entry">
-                <div class="form-grid">
-                    <input type="text" placeholder="School Name">
-                    <input type="text" placeholder="Degree">
-                </div>
-                <div class="form-grid">
-                    <input type="month">
-                    <input type="month">
-                    <input type="text" placeholder="GPA">
-                </div>
-                <div class="form-grid">
-                    <textarea placeholder="Details"></textarea>
-                </div>
-                <button class="delete-btn">Delete</button>
+            <div class="form-grid">
+                <input type="text" placeholder="School Name" value="${edu.school_name || ""}">
+                <input type="text" placeholder="Degree" value="${edu.degree || ""}">
+            </div>
+            <div class="form-grid">
+                <input type="month" value="${edu.start_date || ""}">
+                <input type="month" value="${edu.end_date || ""}">
+                <input type="text" placeholder="GPA" value="${edu.gpa || ""}">
             </div>`;
-        const educationFormContainer = document.querySelector(".education-form");
-        educationFormContainer.insertAdjacentHTML("beforeend", template);
+        document.querySelector(".education-form").insertAdjacentHTML("beforeend", template);
     };
 
-    // Function to add a new work experience section
-    const addExperienceSection = () => {
+    const addExperienceSection = (exp) => {
         const template = `
-            <div class="work-entry">
-                <div class="form-grid">
-                    <input type="text" placeholder="Company Name">
-                    <input type="text" placeholder="Job Title">
-                </div>
-                <div class="form-grid">
-                    <input type="month">
-                    <input type="month">
-                    <input type="text" placeholder="Location">
-                </div>
-                <div class="form-grid">
-                    <textarea placeholder="Description of Responsibilities"></textarea>
-                </div>
-                <button class="delete-btn">Delete</button>
+            <div class="form-grid">
+                <input type="text" placeholder="Company Name" value="${exp.company || ""}">
+                <input type="text" placeholder="Job Title" value="${exp.title || ""}">
             </div>`;
-        const workFormContainer = document.querySelector(".work-form");
-        workFormContainer.insertAdjacentHTML("beforeend", template);
+        document.querySelector(".work-form").insertAdjacentHTML("beforeend", template);
     };
 
-    // Function to add a new link section
-    const addLinkSection = () => {
+    const addLinkSection = (link) => {
         const template = `
-            <div class="link-entry">
-                <div class="form-grid">
-                    <select>
-                        <option value="" disabled selected>Select Link Type</option>
-                        <option value="Portfolio">Portfolio</option>
-                        <option value="LinkedIn">LinkedIn</option>
-                        <option value="GitHub">GitHub</option>
-                        <option value="Other">Other</option>
-                    </select>
-                    <input type="url" placeholder="Link URL">
-                </div>
-                <button class="save-btn">Save</button>
-                <button class="delete-btn">Delete</button>
+            <div class="form-grid">
+                <input type="text" value="${link.type || ""}">
+                <input type="url" value="${link.url || ""}">
             </div>`;
-        const linkFormContainer = document.querySelector(".link-form");
-        linkFormContainer.insertAdjacentHTML("beforeend", template);
+        document.querySelector(".link-form").insertAdjacentHTML("beforeend", template);
     };
 
-    // Populate fields with data from sessionStorage
+    // Fetch data from session storage
     const resumeData = JSON.parse(sessionStorage.getItem("resumeData"));
     if (resumeData) {
         populateFields(resumeData);
