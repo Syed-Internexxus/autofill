@@ -500,7 +500,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const summaryView = document.querySelector(".summary-view");
         if (!summaryView || !profileForm) return;
     
-        // Add summary-active class to hide sidebar
+        // Add summary-active class to .profile-form to hide everything except summary
         profileForm.classList.add("summary-active");
     
         let html = `
@@ -556,12 +556,11 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
     
         summaryView.innerHTML = html;
-        summaryView.style.display = "block";
     
         const editButton = summaryView.querySelector(".edit-information");
         editButton.addEventListener("click", () => {
             // Reload the page on clicking edit information
             location.reload();
         });
-    }    
+    }        
 });

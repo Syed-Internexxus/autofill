@@ -374,20 +374,40 @@ select:valid {
     background: #0056b3;
 }
 
+/* Summary view hidden by default */
 .summary-view {
     display: none;
     background: #ffffff;
     border: 1px solid #ddd;
     border-radius: 10px;
     padding: 2rem;
-    margin-top: 2rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     max-width: 600px;
     width: 90%;
-    margin: 2rem auto; /* Center the summary view */
     text-align: left;
 }
 
+/* When summary-active is applied, hide everything except the summary-view */
+.profile-form.summary-active .sidebar,
+.profile-form.summary-active .form-container {
+    display: none;
+}
+
+/* The profile-form becomes a full-screen flex container when showing summary */
+.profile-form.summary-active {
+    display: flex;
+    min-height: 100vh; /* Full viewport height */
+    flex-direction: column;
+    justify-content: center; /* Vertically center summary */
+    align-items: center;     /* Horizontally center summary */
+}
+
+/* Show the summary-view when in summary-active mode */
+.profile-form.summary-active .summary-view {
+    display: block;
+}
+
+/* Edit information button styles */
 .edit-information {
     background: #007bff;
     color: #fff;
@@ -398,14 +418,8 @@ select:valid {
     margin-bottom: 1rem;
     text-align: center;
 }
-
 .edit-information:hover {
     background: #0056b3;
-}
-
-/* Hide the sidebar when summary is active */
-.profile-form.summary-active .sidebar {
-    display: none;
 }
 
 .summary-view p {
