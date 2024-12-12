@@ -34,13 +34,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const newSkillInput = document.getElementById("new-skill");
     const skillsTagsContainer = document.querySelector(".skills-tags");
 
-    newSkillInput.addEventListener("keydown", (event) => {
-        if (event.key === "Enter" && newSkillInput.value.trim() !== "") {
-            event.preventDefault();
-            addSkillTag(newSkillInput.value.trim());
-            newSkillInput.value = "";
-        }
-    });
+    if (newSkillInput) {
+        newSkillInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" && newSkillInput.value.trim() !== "") {
+                event.preventDefault();
+                addSkillTag(newSkillInput.value.trim());
+                newSkillInput.value = "";
+            }
+        });
+    }
 
     function addSkillTag(skill) {
         const tag = document.createElement("span");
@@ -85,35 +87,52 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Delete entry (only if more than one is present)
         if (target.classList.contains("delete-btn")) {
-            const parentEntry = target.closest(".education-entry, .work-entry, .link-entry");
+            const parentEntry = target.closest(".education-entry, .work-entry, .link-entry, .education-form, .work-form, .link-form");
             if (parentEntry) {
-                const container = parentEntry.parentElement;
-                // Only delete if more than one entry
-                if (container.querySelectorAll(".education-entry, .work-entry, .link-entry").length > 1) {
-                    parentEntry.remove();
-                    ensureAddButtonVisibility();
+                // Determine the container
+                let container = parentEntry.closest(".education-form, .work-form, .link-form");
+                if (!container) {
+                    // If parentEntry itself is .education-form etc.
+                    container = parentEntry;
+                }
+
+                const entries = container.querySelectorAll(".education-entry, .work-entry, .link-entry");
+                // If there's no class like above, it means it's the initial form (no extra added entries)
+                // We handle that differently:
+                const isInitialForm = entries.length === 0 && container.matches(".education-form, .work-form, .link-form");
+
+                if (isInitialForm) {
+                    // If it's the original single form, do not delete it.
+                    // Instead, maybe clear the fields if you want that behavior.
+                    return;
                 } else {
-                    // If there's only one entry, do not delete. Optionally show a message or do nothing.
+                    // If we have multiple entries, we can safely remove the chosen one if there's more than one
+                    const allEntries = entries.length > 0 ? entries : [container];
+                    if (allEntries.length > 1) {
+                        parentEntry.remove();
+                    } else {
+                        // Only one entry left, do not delete
+                    }
                 }
             }
         }
 
         // Save or Edit entry
         if (target.classList.contains("save-btn")) {
-            const parentEntry = target.closest(".education-entry, .work-entry, .link-entry");
+            const parentEntry = target.closest(".education-entry, .work-entry, .link-entry, .education-form, .work-form, .link-form");
             if (parentEntry) {
-                // Check if currently editing or currently viewing
-                const isDisabled = parentEntry.querySelector("input:disabled, textarea:disabled, select:disabled");
-                
+                const inputs = parentEntry.querySelectorAll("input, textarea, select");
+                const isDisabled = Array.from(inputs).some(input => input.disabled);
+
                 if (isDisabled) {
-                    // Currently in 'view' mode (Edit mode was off, fields disabled), switch to 'edit' mode
-                    parentEntry.querySelectorAll("input, textarea, select").forEach((input) => {
+                    // Currently in 'view' mode -> Switch to 'edit' mode
+                    inputs.forEach((input) => {
                         input.removeAttribute("disabled");
                     });
                     target.textContent = "Save";
                 } else {
-                    // Currently in 'edit' mode, switch to 'view' mode
-                    parentEntry.querySelectorAll("input, textarea, select").forEach((input) => {
+                    // Currently in 'edit' mode -> Switch to 'view' mode
+                    inputs.forEach((input) => {
                         input.setAttribute("disabled", true);
                     });
                     target.textContent = "Edit";
@@ -121,19 +140,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
     });
-
-    function ensureAddButtonVisibility() {
-        [".education-form", ".work-form", ".link-form"].forEach((selector) => {
-            const forms = document.querySelector(selector);
-            if (forms) {
-                // Show add button if at least one entry is present (or always show it)
-                // If you want to hide it when there's at least one entry, adjust logic accordingly.
-                const sectionName = selector.split("-")[1]; // "education", "work", "link"
-                const addButton = document.querySelector(`.add-${sectionName}-btn`);
-                if (addButton) addButton.style.display = "block";
-            }
-        });
-    }
 
     // Dynamically add entries
     function addEducationSection(edu = {}) {
@@ -228,12 +234,18 @@ document.addEventListener("DOMContentLoaded", function () {
         newForm.innerHTML = `
             <div class="form-grid">
                 <div>
-                    <label>Type</label>
-                    <input type="text" placeholder="LinkedIn" value="${link.type || ""}">
+                    <label>Link Type</label>
+                    <select>
+                        <option value="" disabled>Select an option...</option>
+                        <option value="Portfolio" ${link.type === "Portfolio" ? "selected" : ""}>Portfolio</option>
+                        <option value="LinkedIn" ${link.type === "LinkedIn" ? "selected" : ""}>LinkedIn</option>
+                        <option value="GitHub" ${link.type === "GitHub" ? "selected" : ""}>GitHub</option>
+                        <option value="Other" ${link.type === "Other" ? "selected" : ""}>Other</option>
+                    </select>
                 </div>
                 <div>
-                    <label>URL</label>
-                    <input type="url" placeholder="https://linkedin.com/in/your-profile" value="${link.url || ""}">
+                    <label>Link URL</label>
+                    <input type="url" placeholder="ex. www.mylink.com" value="${link.url || ""}">
                 </div>
             </div>
             <div class="form-actions">
@@ -244,53 +256,145 @@ document.addEventListener("DOMContentLoaded", function () {
         linkForm.appendChild(newForm);
     }
 
-    // Populate fields with resumeData if available
-    const resumeData = JSON.parse(sessionStorage.getItem("resumeData"));
+    // Fetch data from session storage
+    let resumeData;
+    try {
+        resumeData = JSON.parse(sessionStorage.getItem("resumeData"));
+    } catch (error) {
+        console.error("Invalid JSON in sessionStorage:", error);
+        resumeData = null;
+    }
+
     if (resumeData) {
         populateFields(resumeData);
     }
 
+    // Populate fields function
     function populateFields(data) {
-        // Personal details
+        // Personal Details
         const firstName = document.getElementById("first-name");
         const lastName = document.getElementById("last-name");
-        const phone = document.getElementById("primary-phone");
-        const email = document.getElementById("primary-email");
+        const primaryPhone = document.getElementById("primary-phone");
+        const secondaryPhone = document.getElementById("secondary-phone");
+        const primaryEmail = document.getElementById("primary-email");
+        const backupEmail = document.getElementById("backup-email");
+        const location = document.getElementById("location"); // personal location
 
         if (firstName) firstName.value = data["First Name"] || "";
         if (lastName) lastName.value = data["Last Name"] || "";
-        if (phone) phone.value = data["Contact Number"] || "";
-        if (email) email.value = data["Email"] || "";
-
-        if (data["Website Profile"]) {
-            addLinkSection({
-                type: "LinkedIn",
-                url: data["Website Profile"]
-            });
-        } else {
-            // Ensure at least one link entry
-            addLinkSection();
-        }
+        if (primaryPhone) primaryPhone.value = data["Contact Number"] || "";
+        if (secondaryPhone) secondaryPhone.value = data["Secondary Number"] || "";
+        if (primaryEmail) primaryEmail.value = data["Email"] || "";
+        if (backupEmail) backupEmail.value = data["Backup Email"] || "";
+        if (location) location.value = data["Location"] || "";
 
         // Education
-        if (data["Education"] && Array.isArray(data["Education"]) && data["Education"].length > 0) {
-            data["Education"].forEach((edu) => addEducationSection(edu));
-        } else {
-            // Ensure at least one education entry
-            addEducationSection();
+        // Fill the first education entry
+        const educationData = data["Education"] || [];
+        const firstEdu = educationData[0];
+        const eduForm = document.querySelector(".education-form");
+
+        if (eduForm) {
+            // Initial fields
+            const schoolName = eduForm.querySelector("#school-name");
+            const degree = eduForm.querySelector("#degree");
+            const eduStart = eduForm.querySelector("#edu-start-date");
+            const eduEnd = eduForm.querySelector("#edu-end-date");
+            const gpa = eduForm.querySelector("#gpa");
+            const details = eduForm.querySelector("#details");
+
+            if (firstEdu) {
+                if (schoolName) schoolName.value = firstEdu.school_name || "";
+                if (degree) degree.value = firstEdu.degree || "";
+                if (eduStart) eduStart.value = firstEdu.start_date || "";
+                if (eduEnd) eduEnd.value = firstEdu.end_date || "";
+                if (gpa) gpa.value = firstEdu.gpa || "";
+                if (details) details.value = firstEdu.details || "";
+            }
+
+            // If there's more than one education entry, add them
+            for (let i = 1; i < educationData.length; i++) {
+                addEducationSection(educationData[i]);
+            }
         }
 
         // Work Experience
-        if (data["experience"] && Array.isArray(data["experience"]) && data["experience"].length > 0) {
-            data["experience"].forEach((exp) => addExperienceSection(exp));
-        } else {
-            // Ensure at least one work experience entry
-            addExperienceSection();
+        const experienceData = data["experience"] || [];
+        const firstExp = experienceData[0];
+        const workForm = document.querySelector(".work-form");
+
+        if (workForm) {
+            const companyName = workForm.querySelector("#company-name");
+            const jobTitle = workForm.querySelector("#job-title");
+            const workStart = workForm.querySelector("#start-date");
+            const workEnd = workForm.querySelector("#end-date");
+            const workLocation = workForm.querySelector("#work-experience [id='location']"); 
+            const responsibilities = workForm.querySelector("#responsibilities");
+
+            if (firstExp) {
+                if (companyName) companyName.value = firstExp.company || "";
+                if (jobTitle) jobTitle.value = firstExp.title || "";
+                if (workStart) workStart.value = firstExp.start_date || "";
+                if (workEnd) workEnd.value = firstExp.end_date || "";
+                if (workLocation) workLocation.value = firstExp.location || "";
+                if (responsibilities) responsibilities.value = firstExp.description || "";
+            }
+
+            // Add additional experiences if any
+            for (let i = 1; i < experienceData.length; i++) {
+                addExperienceSection(experienceData[i]);
+            }
         }
 
         // Skills
         if (data["core_skills"]) {
             data["core_skills"].split(",").forEach((skill) => addSkillTag(skill.trim()));
         }
+
+        // Links
+        const linkData = data["Links"] || [];
+        const linkForm = document.querySelector(".link-form");
+
+        if (linkForm) {
+            // Fill the first link entry
+            // The existing HTML for links: has a select #link-type, and input #link-url
+            const firstLink = linkData[0];
+            const linkTypeSelect = linkForm.querySelector("#link-type");
+            const linkUrl = linkForm.querySelector("#link-url");
+
+            if (firstLink) {
+                if (linkTypeSelect) {
+                    linkTypeSelect.value = firstLink.type || "";
+                }
+                if (linkUrl) {
+                    linkUrl.value = firstLink.url || "";
+                }
+            }
+
+            // Additional links
+            for (let i = 1; i < linkData.length; i++) {
+                addLinkSection(linkData[i]);
+            }
+        }
+
+        // EEO Fields
+        const eeoFields = [
+            {id: "authorized-to-work", key: "Authorized to Work"},
+            {id: "require-sponsorship", key: "Require Sponsorship"},
+            {id: "gender-identity", key: "Gender Identity"},
+            {id: "preferred-pronouns", key: "Preferred Pronouns"},
+            {id: "lgbtqia", key: "LGBTQIA"},
+            {id: "racial-identity", key: "Racial Identity"},
+            {id: "hispanic", key: "Hispanic"},
+            {id: "disability", key: "Disability"},
+            {id: "veteran-status", key: "Veteran Status"}
+        ];
+
+        eeoFields.forEach(field => {
+            const elem = document.getElementById(field.id);
+            if (elem && data[field.key]) {
+                elem.value = data[field.key];
+            }
+        });
     }
 });
