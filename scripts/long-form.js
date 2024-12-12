@@ -89,21 +89,19 @@ document.addEventListener("DOMContentLoaded", function () {
         if (target.classList.contains("delete-btn")) {
             const parentEntry = target.closest(".education-entry, .work-entry, .link-entry, .education-form, .work-form, .link-form");
             if (parentEntry) {
-                // Just delete the entry without checks
-                // If it's the original form (like .education-form without .education-entry), clear fields instead of removing entire container
-                // Because that container holds the initial form layout.
+                // If it's the base form container (no .entry), just clear fields
                 if (parentEntry.classList.contains("education-form") || 
                     parentEntry.classList.contains("work-form") || 
                     parentEntry.classList.contains("link-form")) {
                     clearFormFields(parentEntry);
                 } else {
-                    // It's an entry dynamically added
+                    // Dynamically added entry
                     parentEntry.remove();
                 }
             }
         }
 
-        // Save or Edit entry
+        // Toggle Save/Edit on each section
         if (target.classList.contains("save-btn")) {
             const parentEntry = target.closest(".education-entry, .work-entry, .link-entry, .education-form, .work-form, .link-form");
             if (parentEntry) {
@@ -125,7 +123,24 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
         }
+
+        // Final "Save and Finish" button
+        if (target.classList.contains("save-button")) {
+            const data = gatherAllData();
+            displaySummary(data);
+        }
     });
+
+    function clearFormFields(formContainer) {
+        const inputs = formContainer.querySelectorAll("input, textarea, select");
+        inputs.forEach(input => {
+            if (input.tagName.toLowerCase() === 'select') {
+                input.selectedIndex = 0;
+            } else {
+                input.value = "";
+            }
+        });
+    }
 
     // Dynamically add entries
     function addEducationSection(edu = {}) {
@@ -197,7 +212,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 </div>
                 <div>
                     <label>Location</label>
-                    <input type="text" placeholder="San Francisco, CA" value="${exp.location || ""}">
+                    <input type="text" id="work-location" placeholder="San Francisco, CA" value="${exp.location || ""}">
                 </div>
             </div>
             <div class="form-grid full-width">
@@ -255,7 +270,6 @@ document.addEventListener("DOMContentLoaded", function () {
         populateFields(resumeData);
     }
 
-    // Populate fields function
     function populateFields(data) {
         // Personal Details
         const firstName = document.getElementById("first-name");
@@ -264,7 +278,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const secondaryPhone = document.getElementById("secondary-phone");
         const primaryEmail = document.getElementById("primary-email");
         const backupEmail = document.getElementById("backup-email");
-        const location = document.getElementById("location"); // personal location
+        const location = document.getElementById("location");
 
         if (firstName) firstName.value = data["First Name"] || "";
         if (lastName) lastName.value = data["Last Name"] || "";
@@ -275,13 +289,10 @@ document.addEventListener("DOMContentLoaded", function () {
         if (location) location.value = data["Location"] || "";
 
         // Education
-        // Fill the first education entry
         const educationData = data["Education"] || [];
         const firstEdu = educationData[0];
         const eduForm = document.querySelector(".education-form");
-
         if (eduForm) {
-            // Initial fields
             const schoolName = eduForm.querySelector("#school-name");
             const degree = eduForm.querySelector("#degree");
             const eduStart = eduForm.querySelector("#edu-start-date");
@@ -298,7 +309,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (details) details.value = firstEdu.details || "";
             }
 
-            // If there's more than one education entry, add them
+            // Additional entries if more than one
             for (let i = 1; i < educationData.length; i++) {
                 addEducationSection(educationData[i]);
             }
@@ -308,13 +319,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const experienceData = data["experience"] || [];
         const firstExp = experienceData[0];
         const workForm = document.querySelector(".work-form");
-
         if (workForm) {
             const companyName = workForm.querySelector("#company-name");
             const jobTitle = workForm.querySelector("#job-title");
             const workStart = workForm.querySelector("#start-date");
             const workEnd = workForm.querySelector("#end-date");
-            const workLocation = workForm.querySelector("#work-experience [id='location']"); 
+            const workLocation = workForm.querySelector("#work-location");
             const responsibilities = workForm.querySelector("#responsibilities");
 
             if (firstExp) {
@@ -326,7 +336,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (responsibilities) responsibilities.value = firstExp.description || "";
             }
 
-            // Add additional experiences if any
+            // Additional work experiences
             for (let i = 1; i < experienceData.length; i++) {
                 addExperienceSection(experienceData[i]);
             }
@@ -340,14 +350,10 @@ document.addEventListener("DOMContentLoaded", function () {
         // Links
         const linkData = data["Links"] || [];
         const linkForm = document.querySelector(".link-form");
-
         if (linkForm) {
-            // Fill the first link entry
-            // The existing HTML for links: has a select #link-type, and input #link-url
-            const firstLink = linkData[0];
             const linkTypeSelect = linkForm.querySelector("#link-type");
             const linkUrl = linkForm.querySelector("#link-url");
-
+            const firstLink = linkData[0];
             if (firstLink) {
                 if (linkTypeSelect) {
                     linkTypeSelect.value = firstLink.type || "";
@@ -383,6 +389,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+
     function gatherAllData() {
         const data = {};
 
@@ -405,7 +412,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     data.educations.push(getEducationDataFromEntry(entry));
                 });
             } else {
-                // Maybe it only has the initial fields
                 data.educations.push(getEducationDataFromEntry(educationForm));
             }
         }
@@ -428,7 +434,6 @@ document.addEventListener("DOMContentLoaded", function () {
         data.skills = [];
         const skillTags = document.querySelectorAll(".skills-tags .skill-tag");
         skillTags.forEach(tag => {
-            // Remove the '×' from the end by splitting text or store skill separately
             const skillName = tag.firstChild?.textContent.trim();
             if (skillName) data.skills.push(skillName);
         });
@@ -443,7 +448,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     data.links.push(getLinkDataFromEntry(entry));
                 });
             } else {
-                // Only the initial link fields
                 data.links.push(getLinkDataFromEntry(linkForm));
             }
         }
@@ -466,8 +470,8 @@ document.addEventListener("DOMContentLoaded", function () {
         return {
             school_name: entry.querySelector("input[placeholder='Stanford University']")?.value || "",
             degree: entry.querySelector("input[placeholder='ex. Bachelors of Science in Biology']")?.value || "",
-            start_date: entry.querySelector("input[type='month']:nth-of-type(1)")?.value || "",
-            end_date: entry.querySelector("input[type='month']:nth-of-type(2)")?.value || "",
+            start_date: entry.querySelectorAll("input[type='month']")[0]?.value || "",
+            end_date: entry.querySelectorAll("input[type='month']")[1]?.value || "",
             gpa: entry.querySelector("input[placeholder='ex. 4.0']")?.value || "",
             details: entry.querySelector("textarea")?.value || ""
         };
@@ -477,8 +481,8 @@ document.addEventListener("DOMContentLoaded", function () {
         return {
             company: entry.querySelector("input[placeholder='Stripe']")?.value || "",
             title: entry.querySelector("input[placeholder='ex. Software Engineer']")?.value || "",
-            start_date: entry.querySelector("input[type='month']:nth-of-type(1)")?.value || "",
-            end_date: entry.querySelector("input[type='month']:nth-of-type(2)")?.value || "",
+            start_date: entry.querySelectorAll("input[type='month']")[0]?.value || "",
+            end_date: entry.querySelectorAll("input[type='month']")[1]?.value || "",
             location: entry.querySelector("input[placeholder='San Francisco, CA']")?.value || "",
             description: entry.querySelector("textarea")?.value || ""
         };
@@ -492,7 +496,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function displaySummary(data) {
-        // Hide the form and show the summary
         const profileForm = document.querySelector(".profile-form");
         const summaryView = document.querySelector(".summary-view");
         if (!summaryView) return;
@@ -501,7 +504,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const formSections = profileForm.querySelectorAll(".form-section");
         formSections.forEach(sec => sec.style.display = "none");
 
-        // Construct a summary in HTML
         let html = `
             <h2>Current Information</h2>
             <button class="edit-information">Edit information</button>
@@ -558,7 +560,6 @@ document.addEventListener("DOMContentLoaded", function () {
         summaryView.innerHTML = html;
         summaryView.style.display = "block";
 
-        // If needed, add event listener for Edit information button
         const editButton = summaryView.querySelector(".edit-information");
         editButton.addEventListener("click", () => {
             // Hide summary and show forms again if desired
