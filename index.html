@@ -21,7 +21,7 @@
             <a href="https://internexxus.com/internships/?filter-orderby=newest">Explore Internships</a>
             <a href="https://internexxus.com/resume-analyzer/">Resume Analyzer</a>
             <a href="https://cover-letter-generator.internexxus.com/">Cover Letter Generator</a>
-            <a href="#signup" class="signup-btn">Sign Up</a>
+            <a href="#signup" class="signup-btn" id="auth-btn">Sign Up</a> <!-- Will toggle to "Logout" when logged in -->
         </nav>
     </header>
 
@@ -33,68 +33,70 @@
             <button id="get-started">Create Once, Apply Anywhere</button>
         </div>
     </section>
-<!-- Login/Signup Modal -->
-<div class="modal hidden">
-    <div class="modal-content">
-        <div class="wrapper">
-            <div class="form-container">
-                <div class="slide-controls">
-                    <input type="radio" name="slide" id="login" checked>
-                    <input type="radio" name="slide" id="signup">
-                    <label for="login" class="slide login">Login</label>
-                    <label for="signup" class="slide signup">Signup</label>
-                    <div class="slider-tab"></div>
-                </div>
-                <div class="form-inner">
-                    <!-- Login Form -->
-                    <form action="#" class="login">
-                        <div class="field">
-                            <input type="text" placeholder="Email Address" required>
-                        </div>
-                        <div class="field">
-                            <input type="password" placeholder="Password" required>
-                        </div>
-                        <div class="pass-link"><a href="#">Forgot password?</a></div>
-                        <div class="field btn">
-                            <div class="btn-layer">Login</div>
-                        </div>
-                        <div class="separator">
-                            <p>or</p>
-                        </div>
-                        <div class="google-btn">
-                            <img src="assets/google-icon.png" alt="Google Icon" />
-                            <span>Login with Google</span>
-                        </div>
-                        <div class="signup-link">Not a member? <a href="">Signup now</a></div>
-                    </form>
 
-                    <!-- Signup Form -->
-                    <form action="#" class="signup">
-                        <div class="field">
-                            <input type="text" placeholder="Email Address" required>
-                        </div>
-                        <div class="field">
-                            <input type="password" placeholder="Password" required>
-                        </div>
-                        <div class="field">
-                            <input type="password" placeholder="Confirm password" required>
-                        </div>
-                        <div class="field btn">
-                            <div class="btn-layer">Signup</div>
-                        </div>
-                        <div class="separator">
-                            <p>or</p>
-                        </div>
-                        <div class="google-btn">
-                            <img src="assets/google-icon.png" alt="Google Icon" />
-                            <span>Signup with Google</span>
-                        </div>
-                    </form>
+    <!-- Login/Signup Modal -->
+    <div class="modal hidden">
+        <div class="modal-content">
+            <div class="wrapper">
+                <div class="form-container">
+                    <div class="slide-controls">
+                        <input type="radio" name="slide" id="login" checked>
+                        <input type="radio" name="slide" id="signup">
+                        <label for="login" class="slide login">Login</label>
+                        <label for="signup" class="slide signup">Signup</label>
+                        <div class="slider-tab"></div>
+                    </div>
+                    <div class="form-inner">
+                        <!-- Login Form -->
+                        <form action="#" class="login">
+                            <div class="field">
+                                <input type="text" placeholder="Email Address" required>
+                            </div>
+                            <div class="field">
+                                <input type="password" placeholder="Password" required>
+                            </div>
+                            <div class="pass-link"><a href="#">Forgot password?</a></div>
+                            <div class="field btn">
+                                <div class="btn-layer">Login</div>
+                            </div>
+                            <div class="separator">
+                                <p>or</p>
+                            </div>
+                            <div class="google-btn">
+                                <img src="assets/google-icon.png" alt="Google Icon" />
+                                <span>Login with Google</span>
+                            </div>
+                            <div class="signup-link">Not a member? <a href="#">Signup now</a></div>
+                        </form>
+
+                        <!-- Signup Form -->
+                        <form action="#" class="signup">
+                            <div class="field">
+                                <input type="text" placeholder="Email Address" required>
+                            </div>
+                            <div class="field">
+                                <input type="password" placeholder="Password" required>
+                            </div>
+                            <div class="field">
+                                <input type="password" placeholder="Confirm password" required>
+                            </div>
+                            <div class="field btn">
+                                <div class="btn-layer">Signup</div>
+                            </div>
+                            <div class="separator">
+                                <p>or</p>
+                            </div>
+                            <div class="google-btn">
+                                <img src="assets/google-icon.png" alt="Google Icon" />
+                                <span>Signup with Google</span>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
     <!-- Features Section -->
     <section class="features" id="features">
         <h2>Try our other tools for a <span>successful job search</span></h2>
@@ -138,6 +140,7 @@
             </div>
         </div>
     </section>
+
     <!-- Footer Section -->
     <footer class="footer">
         <p>Privacy Policy | Terms of Service | Cookies Policy</p>

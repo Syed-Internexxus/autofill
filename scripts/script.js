@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
   // Firebase Imports
   const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js");
-  const { getAuth, GoogleAuthProvider, sendPasswordResetEmail, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js");
+  const { getAuth, GoogleAuthProvider, sendPasswordResetEmail, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js");
 
   // Firebase configuration
   const firebaseConfig = {
@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const sliderTab = document.querySelector(".slider-tab");
   const googleLoginBtns = document.querySelectorAll(".google-btn");
   const forgotPasswordLink = document.querySelector("form.login .pass-link a");
+  const authBtn = document.querySelector("#auth-btn"); // Sign Up / Logout button
 
   // Email/password form fields
   const emailInput = {
@@ -58,6 +59,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     modal.classList.add("hidden");
   };
 
+  // Toggle between Sign Up and Logout
+  const updateAuthButton = (isLoggedIn) => {
+    if (isLoggedIn) {
+      authBtn.textContent = "Logout";
+      authBtn.removeEventListener("click", showModal);
+      authBtn.addEventListener("click", handleLogout);
+    } else {
+      authBtn.textContent = "Sign Up";
+      authBtn.removeEventListener("click", handleLogout);
+      authBtn.addEventListener("click", showModal);
+    }
+  };
+
+  // Logout handler
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      alert("You have successfully logged out.");
+      updateAuthButton(false);
+    } catch (error) {
+      console.error("Logout Error:", error);
+      alert(error.message);
+    }
+  };
+
   // Event listener for "Get Started" button
   getStartedBtn.addEventListener("click", () => {
     showModal();
@@ -65,10 +91,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // Event listener for "Sign Up" button in navbar
-  signupModalBtn.addEventListener("click", () => {
-    showModal();
-    signupBtn.click();
-  });
+  authBtn.addEventListener("click", showModal);
 
   // Event listener for switching to the Signup form
   signupBtn.addEventListener("click", () => {
@@ -104,8 +127,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const user = result.user;
       console.log("Google Login Success:", user);
       alert(`Welcome ${user.displayName}`);
+      updateAuthButton(true);
       hideModal();
-      window.location.href = "profile.html"; // Redirect to profile page
+      window.location.href = "profile.html";
     } catch (error) {
       console.error("Google Login Error:", error);
       alert("Failed to sign in with Google.");
@@ -133,7 +157,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       console.log("Signup Success:", userCredential.user);
       alert("Signup successful! Redirecting...");
-      window.location.href = "profile.html"; // Redirect to profile page
+      updateAuthButton(true);
+      window.location.href = "profile.html";
     } catch (error) {
       console.error("Signup Error:", error);
       alert(error.message);
@@ -150,8 +175,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log("Login Success:", userCredential.user);
       alert("Welcome back! Redirecting...");
+      updateAuthButton(true);
       hideModal();
-      window.location.href = "profile.html"; // Redirect to profile page
+      window.location.href = "profile.html";
     } catch (error) {
       console.error("Login Error:", error);
       alert(error.message);
@@ -181,4 +207,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   emailAuthBtns.signup.addEventListener("click", handleSignup);
   emailAuthBtns.login.addEventListener("click", handleLogin);
   forgotPasswordLink.addEventListener("click", handlePasswordReset);
+
+  // Check user authentication state
+  auth.onAuthStateChanged((user) => {
+    updateAuthButton(!!user);
+  });
 });
