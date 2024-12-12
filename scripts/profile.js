@@ -1,7 +1,7 @@
-// Select DOM elements
 const fileInput = document.getElementById("resume-upload");
 const uploadLabel = document.querySelector(".upload-text");
 const nextButton = document.getElementById("next-button");
+const manualEntry = document.querySelector(".manual-entry");
 
 // Update label when a file is selected
 fileInput.addEventListener("change", (event) => {
@@ -42,8 +42,10 @@ const sendResumeData = async (base64File, fileType) => {
 
         const responseData = await response.json();
         console.log("Resume data processed successfully:", responseData);
-        alert("Resume processed successfully!");
-        // Add logic for what to do after successful processing (e.g., navigation)
+
+        // Store the response in sessionStorage and redirect to long_form.html
+        sessionStorage.setItem("resumeData", JSON.stringify(responseData));
+        window.location.href = "long_form.html";
     } catch (error) {
         console.error("Error processing resume:", error);
         alert("There was an error processing your resume. Please try again.");
@@ -62,15 +64,22 @@ nextButton.addEventListener("click", async () => {
     try {
         const fileBase64 = await fileToBase64(file);
         const fileType = file.name.split(".").pop().toLowerCase(); // Extract file extension
-
-        if (fileType !== "pdf") {
-            alert("Only PDF files are supported. Please upload a valid PDF.");
+        if (!["pdf", "doc", "docx"].includes(fileType)) {
+            alert("Only PDF, DOC, or DOCX files are supported. Please upload a valid file.");
             return;
         }
-
         await sendResumeData(fileBase64, fileType);
     } catch (error) {
         console.error("Error reading file:", error);
         alert("There was an error reading the file. Please try again.");
     }
+});
+
+// Manual entry redirection
+manualEntry.addEventListener("click", () => {
+    // Clear any stored data in sessionStorage
+    sessionStorage.removeItem("resumeData");
+
+    // Redirect to long_form.html
+    window.location.href = "long_form.html";
 });
