@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", function () {
         removeButton.classList.add("remove-skill");
         removeButton.style.background = "none";
         removeButton.style.border = "none";
-        removeButton.style.color = "#fff";
+        removeButton.style.color = "#000";
         removeButton.style.cursor = "pointer";
         removeButton.style.marginLeft = "8px";
         removeButton.addEventListener("click", () => {
