@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", function () {
         removeButton.classList.add("remove-skill");
         removeButton.style.background = "none";
         removeButton.style.border = "none";
-        removeButton.style.color = "#000";
+        removeButton.style.color = "#fff";
         removeButton.style.cursor = "pointer";
         removeButton.style.marginLeft = "8px";
         removeButton.addEventListener("click", () => {
@@ -85,26 +85,90 @@ document.addEventListener("DOMContentLoaded", function () {
         // Add new education entry
         if (target.classList.contains("add-education-btn")) {
             const educationForm = document.querySelector(".education-form");
-            const newForm = educationForm.cloneNode(true);
-            newForm.querySelectorAll("input, textarea").forEach((input) => {
-                input.value = "";
-            });
-            educationForm.parentNode.insertBefore(newForm, target);
+            const newForm = document.createElement("div");
+            newForm.classList.add("education-entry");
+            newForm.innerHTML = `
+                <div class="form-grid">
+                    <div>
+                        <label for="school-name">School Name</label>
+                        <input type="text" placeholder="Stanford University">
+                    </div>
+                    <div>
+                        <label for="degree">Degree</label>
+                        <input type="text" placeholder="ex. Bachelors of Science in Biology">
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div>
+                        <label for="edu-start-date">Start</label>
+                        <input type="month">
+                    </div>
+                    <div>
+                        <label for="edu-end-date">End</label>
+                        <input type="month">
+                    </div>
+                    <div>
+                        <label for="gpa">GPA</label>
+                        <input type="text" placeholder="ex. 4.0">
+                    </div>
+                </div>
+                <div class="form-grid full-width">
+                    <label for="details">Details</label>
+                    <textarea placeholder="Include relevant coursework, honors, achievements, research, etc."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button class="delete-btn">Delete</button>
+                    <button class="save-btn">Save</button>
+                </div>
+            `;
+            educationForm.appendChild(newForm);
         }
 
         // Add new work experience entry
         if (target.classList.contains("add-experience-btn")) {
             const workForm = document.querySelector(".work-form");
-            const newForm = workForm.cloneNode(true);
-            newForm.querySelectorAll("input, textarea").forEach((input) => {
-                input.value = "";
-            });
-            workForm.parentNode.insertBefore(newForm, target);
+            const newForm = document.createElement("div");
+            newForm.classList.add("work-entry");
+            newForm.innerHTML = `
+                <div class="form-grid">
+                    <div>
+                        <label for="company-name">Company Name</label>
+                        <input type="text" placeholder="Stripe">
+                    </div>
+                    <div>
+                        <label for="job-title">Title</label>
+                        <input type="text" placeholder="ex. Software Engineer">
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div>
+                        <label for="start-date">Start</label>
+                        <input type="month">
+                    </div>
+                    <div>
+                        <label for="end-date">End</label>
+                        <input type="month">
+                    </div>
+                    <div>
+                        <label for="location">Location</label>
+                        <input type="text" placeholder="San Francisco, CA">
+                    </div>
+                </div>
+                <div class="form-grid full-width">
+                    <label for="responsibilities">Description of Responsibilities</label>
+                    <textarea placeholder="Include relevant responsibilities, achievements, contributions, research, etc."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button class="delete-btn">Delete</button>
+                    <button class="save-btn">Save</button>
+                </div>
+            `;
+            workForm.appendChild(newForm);
         }
 
         // Delete entry
         if (target.classList.contains("delete-btn")) {
-            const parentForm = target.closest(".education-form, .work-form");
+            const parentForm = target.closest(".education-entry, .work-entry");
             if (parentForm) {
                 parentForm.remove();
                 ensureAddButtonVisibility();
@@ -127,16 +191,13 @@ document.addEventListener("DOMContentLoaded", function () {
     // Ensure Add button remains visible even when all forms are deleted
     function ensureAddButtonVisibility() {
         [".education-form", ".work-form"].forEach((selector) => {
-            const forms = document.querySelectorAll(selector);
-            if (forms.length === 0) {
-                const addButton = document.querySelector(`.add-${selector.split("-")[0]}-btn`);
-                if (addButton) {
-                    addButton.style.display = "block";
-                }
+            const forms = document.querySelector(selector);
+            if (!forms.children.length) {
+                const addButton = document.querySelector(`.add-${selector.split("-")[1]}-btn`);
+                if (addButton) addButton.style.display = "block";
             }
         });
     }
-
     // Function to populate fields with response data
     const populateFields = (data) => {
         // Personal Details
