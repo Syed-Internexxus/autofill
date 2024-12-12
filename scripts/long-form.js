@@ -1,4 +1,28 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
+    // ===== FIREBASE CONFIGURATION START =====
+    // Firebase Imports
+    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js");
+    const { getAuth, GoogleAuthProvider} = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js");
+    const { getFirestore, collection, addDoc } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js");
+
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyDyIZIJr1uoGlIgauMTqLGiYDWXKzdu1L4",
+        authDomain: "autofill-4da48.firebaseapp.com",
+        projectId: "autofill-4da48",
+        storageBucket: "autofill-4da48.firebasestorage.app",
+        messagingSenderId: "206724954770",
+        appId: "1:206724954770:web:45e0249242cfac6e49844b",
+        measurementId: "G-7CQTP9NR81",
+    };
+
+    // Initialize Firebase App and Services
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const googleProvider = new GoogleAuthProvider();
+    const db = getFirestore(app);
+    // ===== FIREBASE CONFIGURATION END =====
+
     const sections = document.querySelectorAll(".form-section");
     const sidebarItems = document.querySelectorAll(".sidebar-item");
     const nextButtons = document.querySelectorAll(".next-button");
@@ -67,7 +91,7 @@ document.addEventListener("DOMContentLoaded", function () {
         skillsTagsContainer.appendChild(tag);
     }
 
-    document.body.addEventListener("click", (event) => {
+    document.body.addEventListener("click", async (event) => {
         const target = event.target;
 
         // Add new education entry
@@ -90,8 +114,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const parentEntry = target.closest(".education-entry, .work-entry, .link-entry, .education-form, .work-form, .link-form");
             if (parentEntry) {
                 // If it's the base form container (no .entry), just clear fields
-                if (parentEntry.classList.contains("education-form") || 
-                    parentEntry.classList.contains("work-form") || 
+                if (parentEntry.classList.contains("education-form") ||
+                    parentEntry.classList.contains("work-form") ||
                     parentEntry.classList.contains("link-form")) {
                     clearFormFields(parentEntry);
                 } else {
@@ -127,6 +151,15 @@ document.addEventListener("DOMContentLoaded", function () {
         // Final "Save and Finish" button
         if (target.classList.contains("save-button")) {
             const data = gatherAllData();
+            
+            // Write to Firestore
+            try {
+                await addDoc(collection(db, "profiles"), data);
+                console.log("Document successfully written to Firestore!");
+            } catch (e) {
+                console.error("Error adding document to Firestore: ", e);
+            }
+
             displaySummary(data);
         }
     });
@@ -271,7 +304,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function populateFields(data) {
-        // Personal Details
+        // The code for populateFields remains identical to the provided code.
+        // No changes are made to the existing functionalities.
+        // Ensure this function is the same as previously provided.
+        
         const firstName = document.getElementById("first-name");
         const lastName = document.getElementById("last-name");
         const primaryPhone = document.getElementById("primary-phone");
@@ -288,7 +324,6 @@ document.addEventListener("DOMContentLoaded", function () {
         if (backupEmail) backupEmail.value = data["Backup Email"] || "";
         if (location) location.value = data["Location"] || "";
 
-        // Education
         const educationData = data["Education"] || [];
         const firstEdu = educationData[0];
         const eduForm = document.querySelector(".education-form");
@@ -309,13 +344,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (details) details.value = firstEdu.details || "";
             }
 
-            // Additional entries if more than one
             for (let i = 1; i < educationData.length; i++) {
                 addEducationSection(educationData[i]);
             }
         }
 
-        // Work Experience
         const experienceData = data["experience"] || [];
         const firstExp = experienceData[0];
         const workForm = document.querySelector(".work-form");
@@ -336,18 +369,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (responsibilities) responsibilities.value = firstExp.description || "";
             }
 
-            // Additional work experiences
             for (let i = 1; i < experienceData.length; i++) {
                 addExperienceSection(experienceData[i]);
             }
         }
 
-        // Skills
         if (data["core_skills"]) {
             data["core_skills"].split(",").forEach((skill) => addSkillTag(skill.trim()));
         }
 
-        // Links
         const linkData = data["Links"] || [];
         const linkForm = document.querySelector(".link-form");
         if (linkForm) {
@@ -363,13 +393,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
 
-            // Additional links
             for (let i = 1; i < linkData.length; i++) {
                 addLinkSection(linkData[i]);
             }
         }
 
-        // EEO Fields
         const eeoFields = [
             {id: "authorized-to-work", key: "Authorized to Work"},
             {id: "require-sponsorship", key: "Require Sponsorship"},
@@ -393,7 +421,6 @@ document.addEventListener("DOMContentLoaded", function () {
     function gatherAllData() {
         const data = {};
 
-        // Personal Information
         data.firstName = document.getElementById("first-name")?.value || "";
         data.lastName = document.getElementById("last-name")?.value || "";
         data.primaryPhone = document.getElementById("primary-phone")?.value || "";
@@ -402,7 +429,6 @@ document.addEventListener("DOMContentLoaded", function () {
         data.backupEmail = document.getElementById("backup-email")?.value || "";
         data.location = document.getElementById("location")?.value || "";
 
-        // Education
         data.educations = [];
         const educationForm = document.querySelector(".education-form");
         if (educationForm) {
@@ -416,7 +442,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
-        // Work Experience
         data.experiences = [];
         const workForm = document.querySelector(".work-form");
         if (workForm) {
@@ -430,7 +455,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
-        // Skills
         data.skills = [];
         const skillTags = document.querySelectorAll(".skills-tags .skill-tag");
         skillTags.forEach(tag => {
@@ -438,7 +462,6 @@ document.addEventListener("DOMContentLoaded", function () {
             if (skillName) data.skills.push(skillName);
         });
 
-        // Links
         data.links = [];
         const linkForm = document.querySelector(".link-form");
         if (linkForm) {
@@ -452,7 +475,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
-        // EEO & Work Authorization
         data.authorized = document.getElementById("authorized-to-work")?.value || "";
         data.requireSponsorship = document.getElementById("require-sponsorship")?.value || "";
         data.genderIdentity = document.getElementById("gender-identity")?.value || "";
@@ -499,10 +521,10 @@ document.addEventListener("DOMContentLoaded", function () {
         const profileForm = document.querySelector(".profile-form");
         const summaryView = document.querySelector(".summary-view");
         if (!summaryView || !profileForm) return;
-    
+
         // Add summary-active class to hide sidebar
         profileForm.classList.add("summary-active");
-    
+
         let html = `
             <h2>Current Information</h2>
             <button class="edit-information">Edit information</button>
@@ -517,7 +539,7 @@ document.addEventListener("DOMContentLoaded", function () {
             
             <h3>Education Details</h3>
         `;
-    
+
         data.educations.forEach(edu => {
             html += `
                 <p><strong>${edu.degree}</strong>, ${edu.school_name}</p>
@@ -525,7 +547,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <p>${edu.details}</p>
             `;
         });
-    
+
         html += `<h3>Work Experience</h3>`;
         data.experiences.forEach(exp => {
             html += `
@@ -534,15 +556,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 <p>${exp.description}</p>
             `;
         });
-    
+
         html += `<h3>Skills</h3>`;
         html += `<p>${data.skills.join(", ")}</p>`;
-    
+
         html += `<h3>Links</h3>`;
         data.links.forEach(link => {
             html += `<p><strong>${link.type}:</strong> ${link.url}</p>`;
         });
-    
+
         html += `<h3>EEO & Work Authorization</h3>
             <p><strong>Authorized to work in the U.S.:</strong> ${data.authorized}</p>
             <p><strong>Requires Sponsorship:</strong> ${data.requireSponsorship}</p>
@@ -554,14 +576,14 @@ document.addEventListener("DOMContentLoaded", function () {
             <p><strong>Disability Status:</strong> ${data.disability}</p>
             <p><strong>Veteran Status:</strong> ${data.veteranStatus}</p>
         `;
-    
+
         summaryView.innerHTML = html;
         summaryView.style.display = "block";
-    
+
         const editButton = summaryView.querySelector(".edit-information");
         editButton.addEventListener("click", () => {
             // Reload the page on clicking edit information
             location.reload();
         });
-    }    
+    }
 });
