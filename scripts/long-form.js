@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", function () {
         skillsTagsContainer.appendChild(tag);
     }
 
-    // Add functionality for Add, Save, and Delete buttons in Education and Work sections
+    // Add functionality for Add, Save/Edit, and Delete buttons in Education, Work, and Links sections
     document.body.addEventListener("click", (event) => {
         const target = event.target;
 
@@ -166,104 +166,69 @@ document.addEventListener("DOMContentLoaded", function () {
             workForm.appendChild(newForm);
         }
 
+        // Add new link entry
+        if (target.classList.contains("add-link-btn")) {
+            const linkForm = document.querySelector(".link-form");
+            const newForm = document.createElement("div");
+            newForm.classList.add("link-entry");
+            newForm.innerHTML = `
+                <div class="form-grid">
+                    <div>
+                        <label for="link-type">Link Type</label>
+                        <select>
+                            <option value="" disabled selected>Select an option...</option>
+                            <option value="Portfolio">Portfolio</option>
+                            <option value="LinkedIn">LinkedIn</option>
+                            <option value="GitHub">GitHub</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="link-url">Link URL</label>
+                        <input type="url" placeholder="ex. www.mylink.com">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="delete-btn">Delete</button>
+                    <button class="save-btn">Save</button>
+                </div>
+            `;
+            linkForm.appendChild(newForm);
+        }
+
         // Delete entry
         if (target.classList.contains("delete-btn")) {
-            const parentForm = target.closest(".education-entry, .work-entry");
+            const parentForm = target.closest(".education-entry, .work-entry, .link-entry");
             if (parentForm) {
                 parentForm.remove();
                 ensureAddButtonVisibility();
             }
         }
 
-        // Save link entry
+        // Save/Edit entry
         if (target.classList.contains("save-btn")) {
-            const parentForm = target.closest(".link-form");
+            const parentForm = target.closest(".education-entry, .work-entry, .link-entry");
             if (parentForm) {
-                parentForm.querySelectorAll("input, select").forEach((input) => {
-                    input.setAttribute("disabled", true);
-                });
-                target.textContent = "Saved";
-                target.setAttribute("disabled", true);
+                const inputs = parentForm.querySelectorAll("input, textarea, select");
+                if (target.textContent === "Save") {
+                    inputs.forEach((input) => input.setAttribute("disabled", true));
+                    target.textContent = "Edit";
+                } else {
+                    inputs.forEach((input) => input.removeAttribute("disabled"));
+                    target.textContent = "Save";
+                }
             }
         }
     });
 
     // Ensure Add button remains visible even when all forms are deleted
     function ensureAddButtonVisibility() {
-        [".education-form", ".work-form"].forEach((selector) => {
+        [".education-form", ".work-form", ".link-form"].forEach((selector) => {
             const forms = document.querySelector(selector);
             if (!forms.children.length) {
                 const addButton = document.querySelector(`.add-${selector.split("-")[1]}-btn`);
                 if (addButton) addButton.style.display = "block";
             }
         });
-    }
-    // Function to populate fields with response data
-    const populateFields = (data) => {
-        // Personal Details
-        document.getElementById("first-name").value = data["First Name"] || "";
-        document.getElementById("last-name").value = data["Last Name"] || "";
-        document.getElementById("primary-phone").value = data["Contact Number"] || "";
-        document.getElementById("primary-email").value = data["Email"] || "";
-        document.getElementById("location").value = ""; // Location not provided in response
-        if (data["Website Profile"]) {
-            addLinkSection({
-                type: "LinkedIn",
-                url: data["Website Profile"]
-            });
-        }
-
-        // Education
-        if (data["Education"] && data["Education"].length > 0) {
-            data["Education"].forEach((edu) => addEducationSection(edu));
-        }
-
-        // Work Experience
-        if (data["experience"] && Array.isArray(data["experience"])) {
-            data["experience"].forEach((exp) => addExperienceSection(exp));
-        }
-
-        // Skills
-        if (data["core_skills"]) {
-            data["core_skills"].split(",").forEach((skill) => addSkillTag(skill.trim()));
-        }
-    };
-
-    const addEducationSection = (edu) => {
-        const template = `
-            <div class="form-grid">
-                <input type="text" placeholder="School Name" value="${edu.school_name || ""}">
-                <input type="text" placeholder="Degree" value="${edu.degree || ""}">
-            </div>
-            <div class="form-grid">
-                <input type="month" value="${edu.start_date || ""}">
-                <input type="month" value="${edu.end_date || ""}">
-                <input type="text" placeholder="GPA" value="${edu.gpa || ""}">
-            </div>`;
-        document.querySelector(".education-form").insertAdjacentHTML("beforeend", template);
-    };
-
-    const addExperienceSection = (exp) => {
-        const template = `
-            <div class="form-grid">
-                <input type="text" placeholder="Company Name" value="${exp.company || ""}">
-                <input type="text" placeholder="Job Title" value="${exp.title || ""}">
-            </div>`;
-        document.querySelector(".work-form").insertAdjacentHTML("beforeend", template);
-    };
-
-    const addLinkSection = (link) => {
-        const template = `
-            <div class="form-grid">
-                <input type="text" value="${link.type || ""}">
-                <input type="url" value="${link.url || ""}">
-            </div>`;
-        document.querySelector(".link-form").insertAdjacentHTML("beforeend", template);
-    };
-
-    // Fetch data from session storage
-    const resumeData = JSON.parse(sessionStorage.getItem("resumeData"));
-    if (resumeData) {
-        populateFields(resumeData);
     }
 });
