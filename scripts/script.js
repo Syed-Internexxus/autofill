@@ -1,30 +1,161 @@
-// JavaScript for handling login/signup form transitions
+document.addEventListener("DOMContentLoaded", async () => {
+  // Firebase Imports
+  const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js");
+  const { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js");
 
-// Selecting elements
-const loginText = document.querySelector(".title-text .login");
-const loginForm = document.querySelector("form.login");
-const signupForm = document.querySelector("form.signup");
-const loginBtn = document.querySelector("label.login");
-const signupBtn = document.querySelector("label.signup");
-const signupLinkForm = document.querySelector("form .signup-link a");
-const sliderTab = document.querySelector(".slider-tab");
+  // Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyDyIZIJr1uoGlIgauMTqLGiYDWXKzdu1L4",
+    authDomain: "autofill-4da48.firebaseapp.com",
+    projectId: "autofill-4da48",
+    storageBucket: "autofill-4da48.firebasestorage.app",
+    messagingSenderId: "206724954770",
+    appId: "1:206724954770:web:45e0249242cfac6e49844b",
+    measurementId: "G-7CQTP9NR81",
+  };
 
-// Add event listener for the Signup button
-signupBtn.onclick = () => {
-  loginForm.style.marginLeft = "-100%"; // Move the login form out of view
-  loginText.style.marginLeft = "-100%"; // Move the login title
-  sliderTab.style.left = "50%"; // Move the slider tab to the Signup position
-};
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth();
+  const googleProvider = new GoogleAuthProvider();
 
-// Add event listener for the Login button
-loginBtn.onclick = () => {
-  loginForm.style.marginLeft = "0%"; // Reset the login form position
-  loginText.style.marginLeft = "0%"; // Reset the login title position
-  sliderTab.style.left = "0%"; // Reset the slider tab to the Login position
-};
+  // Selecting elements
+  const modal = document.querySelector(".modal");
+  const modalContent = document.querySelector(".modal-content");
+  const signupBtn = document.querySelector("label.signup");
+  const loginBtn = document.querySelector("label.login");
+  const signupLinkForm = document.querySelector("form .signup-link a");
+  const getStartedBtn = document.querySelector(".hero-content button");
+  const signupModalBtn = document.querySelector(".navbar nav .signup-btn");
+  const loginForm = document.querySelector("form.login");
+  const signupForm = document.querySelector("form.signup");
+  const sliderTab = document.querySelector(".slider-tab");
+  const googleLoginBtns = document.querySelectorAll(".google-btn");
 
-// Add event listener for the "Signup" link in the login form
-signupLinkForm.onclick = (e) => {
-  e.preventDefault(); // Prevent default link behavior
-  signupBtn.click(); // Simulate clicking the Signup button
-};
+  // Email/password form fields
+  const emailInput = {
+    signup: document.querySelector("form.signup input[placeholder='Email Address']"),
+    login: document.querySelector("form.login input[placeholder='Email Address']"),
+  };
+  const passwordInput = {
+    signup: document.querySelector("form.signup input[placeholder='Password']"),
+    login: document.querySelector("form.login input[placeholder='Password']"),
+  };
+  const confirmPasswordInput = document.querySelector("form.signup input[placeholder='Confirm password']");
+  const emailAuthBtns = {
+    signup: document.querySelector("form.signup .btn input[type='submit']"),
+    login: document.querySelector("form.login .btn input[type='submit']"),
+  };
+
+  // Show the modal for signup/login
+  const showModal = () => {
+    modal.classList.remove("hidden");
+  };
+
+  // Hide the modal
+  const hideModal = () => {
+    modal.classList.add("hidden");
+  };
+
+  // Event listener for "Get Started" button
+  getStartedBtn.addEventListener("click", () => {
+    showModal();
+    signupBtn.click();
+  });
+
+  // Event listener for "Sign Up" button in navbar
+  signupModalBtn.addEventListener("click", () => {
+    showModal();
+    signupBtn.click();
+  });
+
+  // Event listener for switching to the Signup form
+  signupBtn.addEventListener("click", () => {
+    loginForm.style.display = "none";
+    signupForm.style.display = "block";
+    sliderTab.style.left = "50%";
+  });
+
+  // Event listener for switching to the Login form
+  loginBtn.addEventListener("click", () => {
+    signupForm.style.display = "none";
+    loginForm.style.display = "block";
+    sliderTab.style.left = "0%";
+  });
+
+  // Event listener for "Signup" link in Login form
+  signupLinkForm.addEventListener("click", (e) => {
+    e.preventDefault();
+    signupBtn.click();
+  });
+
+  // Close the modal when clicking outside the modal content
+  modal.addEventListener("click", (e) => {
+    if (!modalContent.contains(e.target)) {
+      hideModal();
+    }
+  });
+
+  // Google SSO login handler
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      console.log("Google Login Success:", user);
+      alert(`Welcome ${user.displayName}`);
+      hideModal();
+    } catch (error) {
+      console.error("Google Login Error:", error);
+      alert("Failed to sign in with Google.");
+    }
+  };
+
+  // Attach event listeners to Google login buttons
+  googleLoginBtns.forEach((btn) =>
+    btn.addEventListener("click", handleGoogleLogin)
+  );
+
+  // Email/password signup handler
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    const email = emailInput.signup.value.trim();
+    const password = passwordInput.signup.value.trim();
+    const confirmPassword = confirmPasswordInput.value.trim();
+
+    if (password !== confirmPassword) {
+      alert("Passwords do not match.");
+      return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      console.log("Signup Success:", userCredential.user);
+      alert("Signup successful! You can now log in.");
+      loginBtn.click();
+    } catch (error) {
+      console.error("Signup Error:", error);
+      alert(error.message);
+    }
+  };
+
+  // Email/password login handler
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    const email = emailInput.login.value.trim();
+    const password = passwordInput.login.value.trim();
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      console.log("Login Success:", userCredential.user);
+      alert("Welcome back!");
+      hideModal();
+    } catch (error) {
+      console.error("Login Error:", error);
+      alert(error.message);
+    }
+  };
+
+  // Attach event listeners to email auth buttons
+  emailAuthBtns.signup.addEventListener("click", handleSignup);
+  emailAuthBtns.login.addEventListener("click", handleLogin);
+});
