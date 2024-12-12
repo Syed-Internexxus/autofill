@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Form - Internexxus</title>
+    <link rel="stylesheet" href="css/profile.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">
+            <a href="index.html">
+                <img src="assets/logo.png" alt="Internexxus Logo">
+            </a>
+        </div>
+        <nav>
+            <a href="all-tools.html">All Tools</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="logout.html">Logout</a>
+        </nav>
+    </header>
+
+    <main class="profile-form">
+        <h1>Profile Form</h1>
+        <h2>Upload your resume</h2>
+        
+        <div class="upload-box">
+            <input type="file" id="resume-upload" accept=".pdf,.doc,.docx" hidden>
+            <label for="resume-upload" class="upload-label">
+                <div class="upload-icon">
+                    <img src="assets/upload.png" alt="Upload Icon">
+                </div>
+                <p class="upload-text">Upload File</p>
+                <p class="upload-instructions">Choose a PDF, DOC, or DOCX file up to 5MB</p>
+            </label>
+        </div>
+
+        <p class="manual-entry">I want to manually enter my information</p>
+        
+        <div class="actions">
+            <button class="next-button" id="next-button">Next</button>
+        </div>
+    </main>
+    <script src="scripts/profile.js"></script>
+</body>
+</html>

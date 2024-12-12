@@ -1,0 +1,135 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar .logo img {
+    height: 40px;
+}
+
+.navbar nav a {
+    margin-left: 1.5rem;
+    text-decoration: none;
+    font-weight: 500;
+    color: #333;
+}
+
+.navbar nav a:hover {
+    color: #007bff;
+}
+
+/* Profile Form */
+.profile-form {
+    text-align: center;
+    padding: 3rem 1.5rem;
+}
+
+.profile-form h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.profile-form h2 {
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin-bottom: 2rem;
+    color: #555;
+}
+
+/* Upload Box */
+.upload-box {
+    border: 2px dashed #007bff;
+    border-radius: 10px;
+    padding: 2rem;
+    background: #f0f8ff;
+    margin: 0 auto 2rem;
+    width: 80%;
+    max-width: 600px;
+    text-align: center;
+}
+
+.upload-box:hover {
+    background: #e6f4ff;
+}
+
+.upload-label {
+    display: block;
+    cursor: pointer;
+}
+
+.upload-icon img {
+    width: 50px;
+    margin-bottom: 1rem;
+}
+
+.upload-text {
+    font-weight: 600;
+    color: #007bff;
+    margin-bottom: 0.5rem;
+}
+
+.upload-instructions {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+/* Manual Entry Link */
+.manual-entry {
+    font-size: 0.9rem;
+    color: #007bff;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-bottom: 2rem;
+}
+
+.manual-entry:hover {
+    color: #0056b3;
+}
+
+/* Actions */
+.actions {
+    text-align: center;
+}
+
+.next-button {
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.next-button:hover {
+    background: #0056b3;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 1rem 0;
+    background: #ffffff;
+    box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.1);
+    font-size: 0.9rem;
+    color: #666;
+}
