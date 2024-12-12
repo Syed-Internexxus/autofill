@@ -47,21 +47,22 @@ document.addEventListener("DOMContentLoaded", function () {
     // Function to populate fields with response data
     const populateFields = (data) => {
         // Personal Details
-        if (data.personal_details) {
-            document.getElementById("first-name").value = data.personal_details.first_name || "";
-            document.getElementById("last-name").value = data.personal_details.last_name || "";
-            document.getElementById("primary-phone").value = data.personal_details.primary_phone || "";
-            document.getElementById("secondary-phone").value = data.personal_details.secondary_phone || "";
-            document.getElementById("primary-email").value = data.personal_details.primary_email || "";
-            document.getElementById("backup-email").value = data.personal_details.backup_email || "";
-            document.getElementById("location").value = data.personal_details.location || "";
+        document.getElementById("first-name").value = data["First Name"] || "";
+        document.getElementById("last-name").value = data["Last Name"] || "";
+        document.getElementById("primary-phone").value = data["Contact Number"] || "";
+        document.getElementById("primary-email").value = data["Email"] || "";
+        document.getElementById("location").value = ""; // Location not provided in response
+        if (data["Website Profile"]) {
+            addLinkSection({
+                type: "LinkedIn",
+                url: data["Website Profile"]
+            });
         }
 
-        // Education
-        if (data.education && Array.isArray(data.education)) {
-            data.education.forEach((edu, index) => {
+        // Education (empty in the current response, but placeholder logic added)
+        if (data["Education"] && data["Education"].length > 0) {
+            data["Education"].forEach((edu, index) => {
                 if (index === 0) {
-                    // Populate the first education section
                     document.getElementById("school-name").value = edu.school_name || "";
                     document.getElementById("degree").value = edu.degree || "";
                     document.getElementById("edu-start-date").value = edu.start_date || "";
@@ -69,34 +70,34 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById("gpa").value = edu.gpa || "";
                     document.getElementById("details").value = edu.details || "";
                 } else {
-                    // Add additional education sections for subsequent entries
                     addEducationSection(edu);
                 }
             });
         }
 
         // Work Experience
-        if (data.work_experience && Array.isArray(data.work_experience)) {
-            data.work_experience.forEach((exp, index) => {
+        if (data["experience"] && Array.isArray(data["experience"])) {
+            data["experience"].forEach((exp, index) => {
                 if (index === 0) {
-                    // Populate the first work experience section
-                    document.getElementById("company-name").value = exp.company_name || "";
-                    document.getElementById("job-title").value = exp.job_title || "";
-                    document.getElementById("start-date").value = exp.start_date || "";
-                    document.getElementById("end-date").value = exp.end_date || "";
+                    document.getElementById("company-name").value = exp.company || "";
+                    document.getElementById("job-title").value = exp.title || "";
+                    document.getElementById("start-date").value = `${exp.Start_Date_Year}-${exp.Start_Date_Month}` || "";
+                    document.getElementById("end-date").value = exp.End_Date_Year
+                        ? `${exp.End_Date_Year}-${exp.End_Date_Month}`
+                        : "Present";
+                    document.getElementById("responsibilities").value = exp.details || "";
                     document.getElementById("location").value = exp.location || "";
-                    document.getElementById("responsibilities").value = exp.responsibilities || "";
                 } else {
-                    // Add additional work experience sections for subsequent entries
                     addExperienceSection(exp);
                 }
             });
         }
 
         // Skills
-        if (data.skills && Array.isArray(data.skills)) {
+        if (data["core_skills"]) {
             const skillsTagsContainer = document.querySelector(".skills-tags");
-            data.skills.forEach((skill) => {
+            const skills = data["core_skills"].split(",").map(skill => skill.trim());
+            skills.forEach((skill) => {
                 const skillTag = document.createElement("span");
                 skillTag.className = "skill-tag";
                 skillTag.textContent = skill;
@@ -104,10 +105,11 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
 
-        // Links
-        if (data.links && Array.isArray(data.links)) {
-            data.links.forEach((link) => {
-                addLinkSection(link);
+        // Achievements
+        if (data["achievements"] && Array.isArray(data["achievements"])) {
+            data["achievements"].forEach((achievement) => {
+                console.log(`Achievement: ${achievement.achievement}, Details: ${achievement.details}`);
+                // Add logic for achievements if you have specific fields in your form
             });
         }
     };
@@ -157,21 +159,21 @@ document.addEventListener("DOMContentLoaded", function () {
             <div class="form-grid">
                 <div>
                     <label for="company-name">Company Name</label>
-                    <input type="text" placeholder="Stripe" value="${exp.company_name || ""}">
+                    <input type="text" placeholder="Stripe" value="${exp.company || ""}">
                 </div>
                 <div>
                     <label for="job-title">Title</label>
-                    <input type="text" placeholder="ex. Software Engineer" value="${exp.job_title || ""}">
+                    <input type="text" placeholder="ex. Software Engineer" value="${exp.title || ""}">
                 </div>
             </div>
             <div class="form-grid">
                 <div>
                     <label for="start-date">Start</label>
-                    <input type="month" value="${exp.start_date || ""}">
+                    <input type="month" value="${exp.Start_Date_Year}-${exp.Start_Date_Month}" placeholder="YYYY-MM">
                 </div>
                 <div>
                     <label for="end-date">End</label>
-                    <input type="month" value="${exp.end_date || ""}">
+                    <input type="month" value="${exp.End_Date_Year ? `${exp.End_Date_Year}-${exp.End_Date_Month}` : "Present"}" placeholder="YYYY-MM">
                 </div>
                 <div>
                     <label for="location">Location</label>
@@ -180,7 +182,7 @@ document.addEventListener("DOMContentLoaded", function () {
             </div>
             <div class="form-grid full-width">
                 <label for="responsibilities">Description of Responsibilities</label>
-                <textarea placeholder="Include relevant responsibilities, achievements, contributions, research, etc.">${exp.responsibilities || ""}</textarea>
+                <textarea placeholder="Include relevant responsibilities, achievements, contributions, research, etc.">${exp.details || ""}</textarea>
             </div>
         `;
         const workFormContainer = document.querySelector(".work-form");
