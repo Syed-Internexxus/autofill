@@ -1,35 +1,23 @@
-// References to modal elements and buttons
-const signupModal = document.getElementById("signup-modal");
-const loginModal = document.getElementById("login-modal");
-const signupLink = document.querySelector(".signup-btn");
-const getStartedButton = document.getElementById("get-started");
-const loginLink = document.getElementById("login-link");
-const signupLinkFromLogin = document.getElementById("signup-link-from-login");
+// JavaScript for handling login/signup form transitions
 
-// Function to open the Sign Up modal
-function openSignupModal() {
-  signupModal.classList.remove("hidden");
-  loginModal.classList.add("hidden"); // Ensure Login modal is hidden
-}
+const loginText = document.querySelector(".title-text .login");
+const loginForm = document.querySelector("form.login");
+const signupForm = document.querySelector("form.signup");
+const loginBtn = document.querySelector("label.login");
+const signupBtn = document.querySelector("label.signup");
+const signupLinkForm = document.querySelector("form .signup-link a");
 
-// Function to open the Login modal
-function openLoginModal() {
-  loginModal.classList.remove("hidden");
-  signupModal.classList.add("hidden"); // Ensure Sign Up modal is hidden
-}
+signupBtn.onclick = () => {
+  loginForm.style.marginLeft = "-50%";
+  loginText.style.marginLeft = "-50%";
+};
 
-// Close modal when clicking outside the modal content
-window.addEventListener("click", (event) => {
-  if (event.target === signupModal) {
-    signupModal.classList.add("hidden");
-  }
-  if (event.target === loginModal) {
-    loginModal.classList.add("hidden");
-  }
-});
+loginBtn.onclick = () => {
+  loginForm.style.marginLeft = "0%";
+  loginText.style.marginLeft = "0%";
+};
 
-// Event listeners for buttons and links
-signupLink.addEventListener("click", openSignupModal);
-getStartedButton.addEventListener("click", openSignupModal);
-loginLink.addEventListener("click", openLoginModal);
-signupLinkFromLogin.addEventListener("click", openSignupModal);
+signupLinkForm.onclick = () => {
+  signupBtn.click();
+  return false;
+};

@@ -7,7 +7,7 @@
     <link rel="stylesheet" type="text/css" href="css/index.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <header class="navbar">
@@ -38,35 +38,81 @@
         <div class="feature-cards">
             <div class="feature-card">
                 <a href="https://cover-letter-generator.internexxus.com/">
-                <div class="icon"><img src="assets/cover-letter.png" alt="Cover Letter"></div>
-                <h3>Cover Letter Generator</h3>
-                <p>Craft a personalized cover letter to stand out.</p>
-            </a>
+                    <div class="icon"><img src="assets/cover-letter.png" alt="Cover Letter"></div>
+                    <h3>Cover Letter Generator</h3>
+                    <p>Craft a personalized cover letter to stand out.</p>
+                </a>
             </div>
             <div class="feature-card">
                 <a href="https://internexxus.com/resume-analyzer/">
-                <div class="icon"><img src="assets/resume-analyzer.png" alt="Resume Builder"></div>
-                <h3>Resume Builder</h3>
-                <p>Create or refine your resume for your ideal role.</p>
+                    <div class="icon"><img src="assets/resume-analyzer.png" alt="Resume Builder"></div>
+                    <h3>Resume Builder</h3>
+                    <p>Create or refine your resume for your ideal role.</p>
                 </a>
             </div>
             <div class="feature-card">
                 <a href="https://chromewebstore.google.com/detail/linkedin-profile-optimize/hbceglllkikabcfijcaggiifofelnfik">
-                <div class="icon"><img src="assets/linkedin.png" alt="LinkedIn Optimizer"></div>
-                <h3>LinkedIn Optimizer</h3>
-                <p>Enhance your LinkedIn profile to attract recruiters.</p>
+                    <div class="icon"><img src="assets/linkedin.png" alt="LinkedIn Optimizer"></div>
+                    <h3>LinkedIn Optimizer</h3>
+                    <p>Enhance your LinkedIn profile to attract recruiters.</p>
                 </a>
             </div>
             <div class="feature-card">
                 <a href="https://internexxus.com/internships/?filter-orderby=newest">
-                <div class="icon"><img src="assets/job.png" alt="Job Recommendations"></div>
-                <h3>Custom Job Recommendations</h3>
-                <p>Get tailored job suggestions based on your resume.</p>
+                    <div class="icon"><img src="assets/job.png" alt="Job Recommendations"></div>
+                    <h3>Custom Job Recommendations</h3>
+                    <p>Get tailored job suggestions based on your resume.</p>
                 </a>
             </div>
         </div>
     </section>    
-      
+    <!-- Login/Signup Section -->
+    <div class="wrapper">
+        <div class="title-text">
+            <div class="title login">Login Form</div>
+            <div class="title signup">Signup Form</div>
+        </div>
+        <div class="form-container">
+            <div class="slide-controls">
+                <input type="radio" name="slide" id="login" checked>
+                <input type="radio" name="slide" id="signup">
+                <label for="login" class="slide login">Login</label>
+                <label for="signup" class="slide signup">Signup</label>
+                <div class="slider-tab"></div>
+            </div>
+            <div class="form-inner">
+                <form action="#" class="login">
+                    <div class="field">
+                        <input type="text" placeholder="Email Address" required>
+                    </div>
+                    <div class="field">
+                        <input type="password" placeholder="Password" required>
+                    </div>
+                    <div class="pass-link"><a href="#">Forgot password?</a></div>
+                    <div class="field btn">
+                        <div class="btn-layer"></div>
+                        <input type="submit" value="Login">
+                    </div>
+                    <div class="signup-link">Not a member? <a href="">Signup now</a></div>
+                </form>
+                <form action="#" class="signup">
+                    <div class="field">
+                        <input type="text" placeholder="Email Address" required>
+                    </div>
+                    <div class="field">
+                        <input type="password" placeholder="Password" required>
+                    </div>
+                    <div class="field">
+                        <input type="password" placeholder="Confirm password" required>
+                    </div>
+                    <div class="field btn">
+                        <div class="btn-layer"></div>
+                        <input type="submit" value="Signup">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div> 
     <footer class="footer">
         <p>Privacy Policy | Terms of Service | Cookies Policy</p>
         <p>&copy; 2024 Internexxus. All rights reserved.</p>
