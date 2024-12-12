@@ -374,15 +374,63 @@ select:valid {
     background: #0056b3;
 }
 
-
-
-
-/* Last Saved Info */
-.last-saved {
-    font-size: 0.9rem;
-    color: #777;
+/* Summary View */
+.summary-view {
+    display: none;
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 2rem;
     margin-top: 2rem;
-    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.summary-view h2 {
+    margin-bottom: 1rem;
+}
+
+.edit-information {
+    background: #007bff;
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 1rem;
+}
+
+.edit-information:hover {
+    background: #0056b3;
+}
+
+.summary-view p {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+.summary-view h3 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr; /* Single column on smaller screens */
+        gap: 1rem;
+    }
+
+    .save-button, .next-button, .add-experience-btn, .add-education-btn, .add-link-btn {
+        width: 100%; /* Full width for smaller devices */
+    }
+
+    .sidebar {
+        width: 60px;
+    }
+
+    .summary-view {
+        padding: 1rem;
+    }
 }
 
 /* Footer */
