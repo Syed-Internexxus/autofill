@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
   // Firebase Imports
   const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js");
-  const { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js");
+  const { getAuth, GoogleAuthProvider, sendPasswordResetEmail, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js");
 
   // Firebase configuration
   const firebaseConfig = {
@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const signupForm = document.querySelector("form.signup");
   const sliderTab = document.querySelector(".slider-tab");
   const googleLoginBtns = document.querySelectorAll(".google-btn");
+  const forgotPasswordLink = document.querySelector("form.login .pass-link a");
 
   // Email/password form fields
   const emailInput = {
@@ -104,6 +105,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.log("Google Login Success:", user);
       alert(`Welcome ${user.displayName}`);
       hideModal();
+      window.location.href = "profile.html"; // Redirect to profile page
     } catch (error) {
       console.error("Google Login Error:", error);
       alert("Failed to sign in with Google.");
@@ -130,8 +132,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       console.log("Signup Success:", userCredential.user);
-      alert("Signup successful! You can now log in.");
-      loginBtn.click();
+      alert("Signup successful! Redirecting...");
+      window.location.href = "profile.html"; // Redirect to profile page
     } catch (error) {
       console.error("Signup Error:", error);
       alert(error.message);
@@ -147,10 +149,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log("Login Success:", userCredential.user);
-      alert("Welcome back!");
+      alert("Welcome back! Redirecting...");
       hideModal();
+      window.location.href = "profile.html"; // Redirect to profile page
     } catch (error) {
       console.error("Login Error:", error);
+      alert(error.message);
+    }
+  };
+
+  // Password reset handler
+  const handlePasswordReset = async (e) => {
+    e.preventDefault();
+    const email = emailInput.login.value.trim();
+
+    if (!email) {
+      alert("Please enter your email address.");
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert("Password reset email sent. Please check your inbox.");
+    } catch (error) {
+      console.error("Password Reset Error:", error);
       alert(error.message);
     }
   };
@@ -158,4 +180,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Attach event listeners to email auth buttons
   emailAuthBtns.signup.addEventListener("click", handleSignup);
   emailAuthBtns.login.addEventListener("click", handleLogin);
+  forgotPasswordLink.addEventListener("click", handlePasswordReset);
 });
