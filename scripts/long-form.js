@@ -2,8 +2,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     // ===== FIREBASE CONFIGURATION START =====
     // Firebase Imports
     const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js");
-    const { getAuth, GoogleAuthProvider} = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js");
-    const { getFirestore, collection, addDoc } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js");
+    const { getAuth, GoogleAuthProvider } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js");
+    const { getFirestore, collection, addDoc, doc, setDoc } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js");
 
     // Firebase configuration
     const firebaseConfig = {
@@ -113,13 +113,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (target.classList.contains("delete-btn")) {
             const parentEntry = target.closest(".education-entry, .work-entry, .link-entry, .education-form, .work-form, .link-form");
             if (parentEntry) {
-                // If it's the base form container (no .entry), just clear fields
                 if (parentEntry.classList.contains("education-form") ||
                     parentEntry.classList.contains("work-form") ||
                     parentEntry.classList.contains("link-form")) {
                     clearFormFields(parentEntry);
                 } else {
-                    // Dynamically added entry
                     parentEntry.remove();
                 }
             }
@@ -151,13 +149,22 @@ document.addEventListener("DOMContentLoaded", async function () {
         // Final "Save and Finish" button
         if (target.classList.contains("save-button")) {
             const data = gatherAllData();
-            
-            // Write to Firestore
+
+            // Check if user is logged in from sessionStorage
+            const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
+
             try {
-                await addDoc(collection(db, "profiles"), data);
-                console.log("Document successfully written to Firestore!");
+                if (currentUser && currentUser.uid) {
+                    // If user is logged in, use setDoc with their uid to create/update doc
+                    await setDoc(doc(db, "profiles", currentUser.uid), data, { merge: true });
+                    console.log("Document successfully written/updated for user:", currentUser.uid);
+                } else {
+                    // If no user logged in, just add a new doc
+                    await addDoc(collection(db, "profiles"), data);
+                    console.log("Document successfully written to Firestore!");
+                }
             } catch (e) {
-                console.error("Error adding document to Firestore: ", e);
+                console.error("Error adding/updating document to Firestore: ", e);
             }
 
             displaySummary(data);
@@ -304,10 +311,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     function populateFields(data) {
-        // The code for populateFields remains identical to the provided code.
-        // No changes are made to the existing functionalities.
-        // Ensure this function is the same as previously provided.
-        
+        // No changes to populateFields code - remains identical
         const firstName = document.getElementById("first-name");
         const lastName = document.getElementById("last-name");
         const primaryPhone = document.getElementById("primary-phone");
@@ -522,7 +526,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         const summaryView = document.querySelector(".summary-view");
         if (!summaryView || !profileForm) return;
 
-        // Add summary-active class to hide sidebar
         profileForm.classList.add("summary-active");
 
         let html = `
@@ -582,7 +585,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         const editButton = summaryView.querySelector(".edit-information");
         editButton.addEventListener("click", () => {
-            // Reload the page on clicking edit information
             location.reload();
         });
     }

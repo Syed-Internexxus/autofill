@@ -70,27 +70,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     signupBtn.click();
   });
 
-  // Event listener for switching to the Signup form
+  // Switch to Signup form
   signupBtn.addEventListener("click", () => {
     loginForm.style.display = "none";
     signupForm.style.display = "block";
     sliderTab.style.left = "50%";
   });
 
-  // Event listener for switching to the Login form
+  // Switch to Login form
   loginBtn.addEventListener("click", () => {
     signupForm.style.display = "none";
     loginForm.style.display = "block";
     sliderTab.style.left = "0%";
   });
 
-  // Event listener for "Signup" link in Login form
+  // Switch from Login to Signup using the link
   signupLinkForm.addEventListener("click", (e) => {
     e.preventDefault();
     signupBtn.click();
   });
 
-  // Close the modal when clicking outside the modal content
+  // Close the modal when clicking outside
   modal.addEventListener("click", (e) => {
     if (!modalContent.contains(e.target)) {
       hideModal();
@@ -104,8 +104,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       const user = result.user;
       console.log("Google Login Success:", user);
       alert(`Welcome ${user.displayName}`);
+      // Store user session info
+      sessionStorage.setItem("currentUser", JSON.stringify({ uid: user.uid, email: user.email }));
       hideModal();
-      window.location.href = "profile.html"; // Redirect to profile page
+      window.location.href = "profile.html";
     } catch (error) {
       console.error("Google Login Error:", error);
       alert("Failed to sign in with Google.");
@@ -133,7 +135,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       console.log("Signup Success:", userCredential.user);
       alert("Signup successful! Redirecting...");
-      window.location.href = "profile.html"; // Redirect to profile page
+      // Store user session info
+      sessionStorage.setItem("currentUser", JSON.stringify({ uid: userCredential.user.uid, email: userCredential.user.email }));
+      window.location.href = "profile.html";
     } catch (error) {
       console.error("Signup Error:", error);
       alert(error.message);
@@ -150,8 +154,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log("Login Success:", userCredential.user);
       alert("Welcome back! Redirecting...");
+      // Store user session info
+      sessionStorage.setItem("currentUser", JSON.stringify({ uid: userCredential.user.uid, email: userCredential.user.email }));
       hideModal();
-      window.location.href = "profile.html"; // Redirect to profile page
+      window.location.href = "profile.html";
     } catch (error) {
       console.error("Login Error:", error);
       alert(error.message);
