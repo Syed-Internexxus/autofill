@@ -40,7 +40,7 @@ const sendResumeData = async (base64File, fileType) => {
         }
 
         const responseData = await response.json();
-        console.dir("Resume data processed successfully:", responseData);
+        console.log("Resume data processed successfully:", responseData);
         alert("Resume processed successfully!");
         // Add logic for what to do after successful processing (e.g., navigation)
     } catch (error) {
