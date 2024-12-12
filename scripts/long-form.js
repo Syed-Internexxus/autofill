@@ -85,34 +85,20 @@ document.addEventListener("DOMContentLoaded", function () {
             addLinkSection();
         }
 
-        // Delete entry (only if more than one is present)
+        // Delete entry
         if (target.classList.contains("delete-btn")) {
             const parentEntry = target.closest(".education-entry, .work-entry, .link-entry, .education-form, .work-form, .link-form");
             if (parentEntry) {
-                // Determine the container
-                let container = parentEntry.closest(".education-form, .work-form, .link-form");
-                if (!container) {
-                    // If parentEntry itself is .education-form etc.
-                    container = parentEntry;
-                }
-
-                const entries = container.querySelectorAll(".education-entry, .work-entry, .link-entry");
-                // If there's no class like above, it means it's the initial form (no extra added entries)
-                // We handle that differently:
-                const isInitialForm = entries.length === 0 && container.matches(".education-form, .work-form, .link-form");
-
-                if (isInitialForm) {
-                    // If it's the original single form, do not delete it.
-                    // Instead, maybe clear the fields if you want that behavior.
-                    return;
+                // Just delete the entry without checks
+                // If it's the original form (like .education-form without .education-entry), clear fields instead of removing entire container
+                // Because that container holds the initial form layout.
+                if (parentEntry.classList.contains("education-form") || 
+                    parentEntry.classList.contains("work-form") || 
+                    parentEntry.classList.contains("link-form")) {
+                    clearFormFields(parentEntry);
                 } else {
-                    // If we have multiple entries, we can safely remove the chosen one if there's more than one
-                    const allEntries = entries.length > 0 ? entries : [container];
-                    if (allEntries.length > 1) {
-                        parentEntry.remove();
-                    } else {
-                        // Only one entry left, do not delete
-                    }
+                    // It's an entry dynamically added
+                    parentEntry.remove();
                 }
             }
         }
@@ -395,6 +381,189 @@ document.addEventListener("DOMContentLoaded", function () {
             if (elem && data[field.key]) {
                 elem.value = data[field.key];
             }
+        });
+    }
+    function gatherAllData() {
+        const data = {};
+
+        // Personal Information
+        data.firstName = document.getElementById("first-name")?.value || "";
+        data.lastName = document.getElementById("last-name")?.value || "";
+        data.primaryPhone = document.getElementById("primary-phone")?.value || "";
+        data.secondaryPhone = document.getElementById("secondary-phone")?.value || "";
+        data.primaryEmail = document.getElementById("primary-email")?.value || "";
+        data.backupEmail = document.getElementById("backup-email")?.value || "";
+        data.location = document.getElementById("location")?.value || "";
+
+        // Education
+        data.educations = [];
+        const educationForm = document.querySelector(".education-form");
+        if (educationForm) {
+            const eduEntries = educationForm.querySelectorAll(".education-entry");
+            if (eduEntries.length > 0) {
+                eduEntries.forEach(entry => {
+                    data.educations.push(getEducationDataFromEntry(entry));
+                });
+            } else {
+                // Maybe it only has the initial fields
+                data.educations.push(getEducationDataFromEntry(educationForm));
+            }
+        }
+
+        // Work Experience
+        data.experiences = [];
+        const workForm = document.querySelector(".work-form");
+        if (workForm) {
+            const workEntries = workForm.querySelectorAll(".work-entry");
+            if (workEntries.length > 0) {
+                workEntries.forEach(entry => {
+                    data.experiences.push(getWorkDataFromEntry(entry));
+                });
+            } else {
+                data.experiences.push(getWorkDataFromEntry(workForm));
+            }
+        }
+
+        // Skills
+        data.skills = [];
+        const skillTags = document.querySelectorAll(".skills-tags .skill-tag");
+        skillTags.forEach(tag => {
+            // Remove the '×' from the end by splitting text or store skill separately
+            const skillName = tag.firstChild?.textContent.trim();
+            if (skillName) data.skills.push(skillName);
+        });
+
+        // Links
+        data.links = [];
+        const linkForm = document.querySelector(".link-form");
+        if (linkForm) {
+            const linkEntries = linkForm.querySelectorAll(".link-entry");
+            if (linkEntries.length > 0) {
+                linkEntries.forEach(entry => {
+                    data.links.push(getLinkDataFromEntry(entry));
+                });
+            } else {
+                // Only the initial link fields
+                data.links.push(getLinkDataFromEntry(linkForm));
+            }
+        }
+
+        // EEO & Work Authorization
+        data.authorized = document.getElementById("authorized-to-work")?.value || "";
+        data.requireSponsorship = document.getElementById("require-sponsorship")?.value || "";
+        data.genderIdentity = document.getElementById("gender-identity")?.value || "";
+        data.preferredPronouns = document.getElementById("preferred-pronouns")?.value || "";
+        data.lgbtqia = document.getElementById("lgbtqia")?.value || "";
+        data.racialIdentity = document.getElementById("racial-identity")?.value || "";
+        data.hispanic = document.getElementById("hispanic")?.value || "";
+        data.disability = document.getElementById("disability")?.value || "";
+        data.veteranStatus = document.getElementById("veteran-status")?.value || "";
+
+        return data;
+    }
+
+    function getEducationDataFromEntry(entry) {
+        return {
+            school_name: entry.querySelector("input[placeholder='Stanford University']")?.value || "",
+            degree: entry.querySelector("input[placeholder='ex. Bachelors of Science in Biology']")?.value || "",
+            start_date: entry.querySelector("input[type='month']:nth-of-type(1)")?.value || "",
+            end_date: entry.querySelector("input[type='month']:nth-of-type(2)")?.value || "",
+            gpa: entry.querySelector("input[placeholder='ex. 4.0']")?.value || "",
+            details: entry.querySelector("textarea")?.value || ""
+        };
+    }
+
+    function getWorkDataFromEntry(entry) {
+        return {
+            company: entry.querySelector("input[placeholder='Stripe']")?.value || "",
+            title: entry.querySelector("input[placeholder='ex. Software Engineer']")?.value || "",
+            start_date: entry.querySelector("input[type='month']:nth-of-type(1)")?.value || "",
+            end_date: entry.querySelector("input[type='month']:nth-of-type(2)")?.value || "",
+            location: entry.querySelector("input[placeholder='San Francisco, CA']")?.value || "",
+            description: entry.querySelector("textarea")?.value || ""
+        };
+    }
+
+    function getLinkDataFromEntry(entry) {
+        return {
+            type: entry.querySelector("select")?.value || "",
+            url: entry.querySelector("input[type='url']")?.value || "",
+        };
+    }
+
+    function displaySummary(data) {
+        // Hide the form and show the summary
+        const profileForm = document.querySelector(".profile-form");
+        const summaryView = document.querySelector(".summary-view");
+        if (!summaryView) return;
+
+        // Hide all form sections
+        const formSections = profileForm.querySelectorAll(".form-section");
+        formSections.forEach(sec => sec.style.display = "none");
+
+        // Construct a summary in HTML
+        let html = `
+            <h2>Current Information</h2>
+            <button class="edit-information">Edit information</button>
+
+            <h3>Personal Information</h3>
+            <p><strong>First Name:</strong> ${data.firstName}</p>
+            <p><strong>Last Name:</strong> ${data.lastName}</p>
+            <p><strong>Primary Phone:</strong> ${data.primaryPhone}</p>
+            <p><strong>Secondary Phone:</strong> ${data.secondaryPhone}</p>
+            <p><strong>Primary Email:</strong> ${data.primaryEmail}</p>
+            <p><strong>Backup Email:</strong> ${data.backupEmail}</p>
+            <p><strong>Location:</strong> ${data.location}</p>
+
+            <h3>Education Details</h3>
+        `;
+
+        data.educations.forEach(edu => {
+            html += `
+                <p><strong>${edu.degree}</strong>, ${edu.school_name}</p>
+                <p><em>${edu.start_date} - ${edu.end_date}, GPA: ${edu.gpa}</em></p>
+                <p>${edu.details}</p>
+            `;
+        });
+
+        html += `<h3>Work Experience</h3>`;
+        data.experiences.forEach(exp => {
+            html += `
+                <p><strong>${exp.title}</strong>, ${exp.company}</p>
+                <p><em>${exp.start_date} - ${exp.end_date}, ${exp.location}</em></p>
+                <p>${exp.description}</p>
+            `;
+        });
+
+        html += `<h3>Skills</h3>`;
+        html += `<p>${data.skills.join(", ")}</p>`;
+
+        html += `<h3>Links</h3>`;
+        data.links.forEach(link => {
+            html += `<p><strong>${link.type}:</strong> ${link.url}</p>`;
+        });
+
+        html += `<h3>EEO & Work Authorization</h3>
+            <p><strong>Authorized to work in the U.S.:</strong> ${data.authorized}</p>
+            <p><strong>Requires Sponsorship:</strong> ${data.requireSponsorship}</p>
+            <p><strong>Gender Identity:</strong> ${data.genderIdentity}</p>
+            <p><strong>Preferred Pronouns:</strong> ${data.preferredPronouns}</p>
+            <p><strong>LGBTQIA+ identity:</strong> ${data.lgbtqia}</p>
+            <p><strong>Racial Identity:</strong> ${data.racialIdentity}</p>
+            <p><strong>Hispanic:</strong> ${data.hispanic}</p>
+            <p><strong>Disability Status:</strong> ${data.disability}</p>
+            <p><strong>Veteran Status:</strong> ${data.veteranStatus}</p>
+        `;
+
+        summaryView.innerHTML = html;
+        summaryView.style.display = "block";
+
+        // If needed, add event listener for Edit information button
+        const editButton = summaryView.querySelector(".edit-information");
+        editButton.addEventListener("click", () => {
+            // Hide summary and show forms again if desired
+            summaryView.style.display = "none";
+            formSections.forEach(sec => sec.style.display = "block");
         });
     }
 });
