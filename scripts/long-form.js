@@ -44,6 +44,80 @@ document.addEventListener("DOMContentLoaded", function () {
     // Initialize the first section as active
     showSection(0);
 
+    // Skills Section Functionality
+    const newSkillInput = document.getElementById("new-skill");
+    const skillsTagsContainer = document.querySelector(".skills-tags");
+
+    // Add skill as a tag on pressing Enter
+    newSkillInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && newSkillInput.value.trim() !== "") {
+            event.preventDefault();
+            addSkillTag(newSkillInput.value.trim());
+            newSkillInput.value = "";
+        }
+    });
+
+    function addSkillTag(skill) {
+        const tag = document.createElement("span");
+        tag.classList.add("skill-tag");
+        tag.textContent = skill;
+
+        const removeButton = document.createElement("button");
+        removeButton.textContent = "×";
+        removeButton.classList.add("remove-skill");
+        removeButton.addEventListener("click", () => {
+            skillsTagsContainer.removeChild(tag);
+        });
+
+        tag.appendChild(removeButton);
+        skillsTagsContainer.appendChild(tag);
+    }
+
+    // Add functionality for Add, Save, and Delete buttons in Education and Work sections
+    document.body.addEventListener("click", (event) => {
+        const target = event.target;
+
+        // Add new education entry
+        if (target.classList.contains("add-education-btn")) {
+            const educationForm = document.querySelector(".education-form");
+            const newForm = educationForm.cloneNode(true);
+            newForm.querySelectorAll("input, textarea").forEach((input) => {
+                input.value = "";
+            });
+            educationForm.parentNode.insertBefore(newForm, target);
+        }
+
+        // Add new work experience entry
+        if (target.classList.contains("add-experience-btn")) {
+            const workForm = document.querySelector(".work-form");
+            const newForm = workForm.cloneNode(true);
+            newForm.querySelectorAll("input, textarea").forEach((input) => {
+                input.value = "";
+            });
+            workForm.parentNode.insertBefore(newForm, target);
+        }
+
+        // Delete entry
+        if (target.classList.contains("delete-btn")) {
+            const parentForm = target.closest(".education-form, .work-form");
+            if (parentForm) {
+                parentForm.remove();
+            }
+        }
+
+        // Save entry (for demonstration purposes, log the saved data)
+        if (target.classList.contains("save-btn")) {
+            const parentForm = target.closest(".education-form, .work-form");
+            if (parentForm) {
+                const formData = {};
+                parentForm.querySelectorAll("input, textarea").forEach((input) => {
+                    formData[input.name || input.id] = input.value;
+                });
+                console.log("Saved data:", formData);
+            }
+        }
+    });
+
     // Function to populate fields with response data
     const populateFields = (data) => {
         // Personal Details
@@ -59,166 +133,55 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
 
-        // Education (empty in the current response, but placeholder logic added)
+        // Education
         if (data["Education"] && data["Education"].length > 0) {
-            data["Education"].forEach((edu, index) => {
-                if (index === 0) {
-                    document.getElementById("school-name").value = edu.school_name || "";
-                    document.getElementById("degree").value = edu.degree || "";
-                    document.getElementById("edu-start-date").value = edu.start_date || "";
-                    document.getElementById("edu-end-date").value = edu.end_date || "";
-                    document.getElementById("gpa").value = edu.gpa || "";
-                    document.getElementById("details").value = edu.details || "";
-                } else {
-                    addEducationSection(edu);
-                }
-            });
+            data["Education"].forEach((edu) => addEducationSection(edu));
         }
 
         // Work Experience
         if (data["experience"] && Array.isArray(data["experience"])) {
-            data["experience"].forEach((exp, index) => {
-                if (index === 0) {
-                    document.getElementById("company-name").value = exp.company || "";
-                    document.getElementById("job-title").value = exp.title || "";
-                    document.getElementById("start-date").value = `${exp.Start_Date_Year}-${exp.Start_Date_Month}` || "";
-                    document.getElementById("end-date").value = exp.End_Date_Year
-                        ? `${exp.End_Date_Year}-${exp.End_Date_Month}`
-                        : "Present";
-                    document.getElementById("responsibilities").value = exp.details || "";
-                    document.getElementById("location").value = exp.location || "";
-                } else {
-                    addExperienceSection(exp);
-                }
-            });
+            data["experience"].forEach((exp) => addExperienceSection(exp));
         }
 
         // Skills
         if (data["core_skills"]) {
-            const skillsTagsContainer = document.querySelector(".skills-tags");
-            const skills = data["core_skills"].split(",").map(skill => skill.trim());
-            skills.forEach((skill) => {
-                const skillTag = document.createElement("span");
-                skillTag.className = "skill-tag";
-                skillTag.textContent = skill;
-                skillsTagsContainer.appendChild(skillTag);
-            });
-        }
-
-        // Achievements
-        if (data["achievements"] && Array.isArray(data["achievements"])) {
-            data["achievements"].forEach((achievement) => {
-                console.log(`Achievement: ${achievement.achievement}, Details: ${achievement.details}`);
-                // Add logic for achievements if you have specific fields in your form
-            });
+            data["core_skills"].split(",").forEach((skill) => addSkillTag(skill.trim()));
         }
     };
 
-    // Helper function to add new education section
     const addEducationSection = (edu) => {
         const template = `
             <div class="form-grid">
-                <div>
-                    <label for="school-name">School Name</label>
-                    <input type="text" placeholder="Stanford University" value="${edu.school_name || ""}">
-                </div>
-                <div>
-                    <label for="degree">Degree</label>
-                    <input type="text" placeholder="ex. Bachelors of Science in Biology" value="${edu.degree || ""}">
-                </div>
+                <input type="text" placeholder="School Name" value="${edu.school_name || ""}">
+                <input type="text" placeholder="Degree" value="${edu.degree || ""}">
             </div>
             <div class="form-grid">
-                <div>
-                    <label for="edu-start-date">Start</label>
-                    <input type="month" value="${edu.start_date || ""}">
-                </div>
-                <div>
-                    <label for="edu-end-date">End</label>
-                    <input type="month" value="${edu.end_date || ""}">
-                </div>
-                <div>
-                    <label for="gpa">GPA</label>
-                    <input type="text" placeholder="ex. 4.0" value="${edu.gpa || ""}">
-                </div>
-            </div>
-            <div class="form-grid full-width">
-                <label for="details">Details</label>
-                <textarea placeholder="Include relevant coursework, honors, achievements, research, etc.">${edu.details || ""}</textarea>
-            </div>
-        `;
-        const educationFormContainer = document.querySelector(".education-form");
-        const div = document.createElement("div");
-        div.className = "form-grid";
-        div.innerHTML = template;
-        educationFormContainer.appendChild(div);
+                <input type="month" value="${edu.start_date || ""}">
+                <input type="month" value="${edu.end_date || ""}">
+                <input type="text" placeholder="GPA" value="${edu.gpa || ""}">
+            </div>`;
+        document.querySelector(".education-form").insertAdjacentHTML("beforeend", template);
     };
 
-    // Helper function to add new work experience section
     const addExperienceSection = (exp) => {
         const template = `
             <div class="form-grid">
-                <div>
-                    <label for="company-name">Company Name</label>
-                    <input type="text" placeholder="Stripe" value="${exp.company || ""}">
-                </div>
-                <div>
-                    <label for="job-title">Title</label>
-                    <input type="text" placeholder="ex. Software Engineer" value="${exp.title || ""}">
-                </div>
-            </div>
-            <div class="form-grid">
-                <div>
-                    <label for="start-date">Start</label>
-                    <input type="month" value="${exp.Start_Date_Year}-${exp.Start_Date_Month}" placeholder="YYYY-MM">
-                </div>
-                <div>
-                    <label for="end-date">End</label>
-                    <input type="month" value="${exp.End_Date_Year ? `${exp.End_Date_Year}-${exp.End_Date_Month}` : "Present"}" placeholder="YYYY-MM">
-                </div>
-                <div>
-                    <label for="location">Location</label>
-                    <input type="text" placeholder="San Francisco, CA" value="${exp.location || ""}">
-                </div>
-            </div>
-            <div class="form-grid full-width">
-                <label for="responsibilities">Description of Responsibilities</label>
-                <textarea placeholder="Include relevant responsibilities, achievements, contributions, research, etc.">${exp.details || ""}</textarea>
-            </div>
-        `;
-        const workFormContainer = document.querySelector(".work-form");
-        const div = document.createElement("div");
-        div.className = "form-grid";
-        div.innerHTML = template;
-        workFormContainer.appendChild(div);
+                <input type="text" placeholder="Company Name" value="${exp.company || ""}">
+                <input type="text" placeholder="Job Title" value="${exp.title || ""}">
+            </div>`;
+        document.querySelector(".work-form").insertAdjacentHTML("beforeend", template);
     };
 
-    // Helper function to add a new link section
     const addLinkSection = (link) => {
-        const linkFormContainer = document.querySelector(".link-form");
         const template = `
             <div class="form-grid">
-                <div>
-                    <label for="link-type">Link Type</label>
-                    <select>
-                        <option value="Portfolio" ${link.type === "Portfolio" ? "selected" : ""}>Portfolio</option>
-                        <option value="LinkedIn" ${link.type === "LinkedIn" ? "selected" : ""}>LinkedIn</option>
-                        <option value="GitHub" ${link.type === "GitHub" ? "selected" : ""}>GitHub</option>
-                        <option value="Other" ${link.type === "Other" ? "selected" : ""}>Other</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="link-url">Link URL</label>
-                    <input type="url" placeholder="ex. www.mylink.com" value="${link.url || ""}">
-                </div>
-            </div>
-        `;
-        const div = document.createElement("div");
-        div.className = "form-grid";
-        div.innerHTML = template;
-        linkFormContainer.appendChild(div);
+                <input type="text" value="${link.type || ""}">
+                <input type="url" value="${link.url || ""}">
+            </div>`;
+        document.querySelector(".link-form").insertAdjacentHTML("beforeend", template);
     };
 
-    // Main logic to populate data on page load
+    // Fetch data from session storage
     const resumeData = JSON.parse(sessionStorage.getItem("resumeData"));
     if (resumeData) {
         populateFields(resumeData);
