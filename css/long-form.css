@@ -369,13 +369,16 @@ select:valid {
 
 .summary-view p1 {
     font-size: 1.2rem;
-    font-weight: bold;
-    color: #ffffff;
-    text-align: center;
-    padding: 10px;
-    border: 2px solid transparent;
+    font-weight: 600;
+    color: #333; /* Darker text for better readability */
+    background-color: #f8f9fa; /* Light background for contrast */
+    padding: 15px;
     border-radius: 8px;
-    box-shadow: 0 0 20px rgba(255, 0, 255, 0.5), 0 0 10px rgba(0, 255, 255, 0.5);
+    border: 1px solid #ddd;
+    text-align: center;
+    display: block;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Align "Current Information" and "Edit information" in one line */
