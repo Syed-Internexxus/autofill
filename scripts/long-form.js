@@ -646,5 +646,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         editButton.addEventListener("click", () => {
             location.reload();
         });
-    }  
+    }
+    chrome.runtime.sendMessage({ action: "dataUpdated", payload: savedData }, (response) => {
+        console.log("Extension notified:", response);
+    });
 });
