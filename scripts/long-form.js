@@ -23,6 +23,43 @@ document.addEventListener("DOMContentLoaded", async function () {
     const db = getFirestore(app);
     // ===== FIREBASE CONFIGURATION END =====
 
+        // Retrieve current user and data if available
+        const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
+
+        const populateFieldsFromFirestore = async (userId) => {
+            try {
+                const docSnap = await getDoc(doc(db, "profiles", userId));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    sessionStorage.setItem("resumeData", JSON.stringify(data));
+                    populateFields(data);
+                } else {
+                    console.warn("No user data found in Firestore for user:", userId);
+                    // User logged in but no data yet, fields remain blank until saved
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        };
+    
+        if (currentUser?.uid) {
+            // User is logged in, fetch their data from Firestore
+            await populateFieldsFromFirestore(currentUser.uid);
+        } else {
+            // If user is not logged in, check if resumeData is in sessionStorage
+            let resumeData;
+            try {
+                resumeData = JSON.parse(sessionStorage.getItem("resumeData"));
+            } catch (error) {
+                console.error("Invalid JSON in sessionStorage:", error);
+                resumeData = null;
+            }
+    
+            if (resumeData) {
+                populateFields(resumeData);
+            }
+        }
+        
     const sections = document.querySelectorAll(".form-section");
     const sidebarItems = document.querySelectorAll(".sidebar-item");
     const nextButtons = document.querySelectorAll(".next-button");
@@ -146,23 +183,45 @@ document.addEventListener("DOMContentLoaded", async function () {
             }
         }
 
-        // Final "Save and Finish" button
+        // Final "Save and Finish" button handler
         if (target.classList.contains("save-button")) {
             const data = gatherAllData();
-
-            // Check if user is logged in from sessionStorage
+            
             const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
+            let docRef;
 
             try {
                 if (currentUser && currentUser.uid) {
-                    // If user is logged in, use setDoc with their uid to create/update doc
-                    await setDoc(doc(db, "profiles", currentUser.uid), data, { merge: true });
+                    // User is logged in. Use setDoc with their uid to create/update doc
+                    docRef = doc(db, "profiles", currentUser.uid);
+                    await setDoc(docRef, data, { merge: true });
                     console.log("Document successfully written/updated for user:", currentUser.uid);
                 } else {
-                    // If no user logged in, just add a new doc
-                    await addDoc(collection(db, "profiles"), data);
+                    // No user logged in, add a new doc
+                    docRef = await addDoc(collection(db, "profiles"), data);
                     console.log("Document successfully written to Firestore!");
                 }
+                
+                // After writing data to Firestore, read it back
+                // If docRef is a DocumentReference (from setDoc), we have it directly
+                // If docRef is from addDoc, docRef is returned by addDoc and is a DocumentReference
+                const docSnap = await getDoc(docRef instanceof Function ? docRef() : docRef);
+                if (docSnap.exists()) {
+                    const savedData = docSnap.data();
+                    console.log("Retrieved data from Firestore:", savedData);
+
+                    // Store retrieved data in chrome.storage.local
+                    chrome.storage.local.set({ userDataForFilling: savedData }, function() {
+                        if (chrome.runtime.lastError) {
+                            console.error('Error saving Firestore data to local storage:', chrome.runtime.lastError);
+                        } else {
+                            console.log('Firestore data saved in extension local storage for filling.');
+                        }
+                    });
+                } else {
+                    console.error("No such document after saving!");
+                }
+
             } catch (e) {
                 console.error("Error adding/updating document to Firestore: ", e);
             }

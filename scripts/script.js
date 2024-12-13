@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Firebase Imports
   const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js");
   const { getAuth, GoogleAuthProvider, sendPasswordResetEmail, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js");
+  const { getFirestore, doc, getDoc } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js");
 
   // Firebase configuration
   const firebaseConfig = {
@@ -18,6 +19,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const app = initializeApp(firebaseConfig);
   const auth = getAuth();
   const googleProvider = new GoogleAuthProvider();
+  const db = getFirestore(app);
 
   // Selecting elements
   const modal = document.querySelector(".modal");
@@ -48,76 +50,51 @@ document.addEventListener("DOMContentLoaded", async () => {
     login: document.querySelector("form.login .btn input[type='submit']"),
   };
 
-  // Show the modal for signup/login
-  const showModal = () => {
-    modal.classList.remove("hidden");
-  };
+  // Show/hide modal
+  const showModal = () => { modal.classList.remove("hidden"); };
+  const hideModal = () => { modal.classList.add("hidden"); };
 
-  // Hide the modal
-  const hideModal = () => {
-    modal.classList.add("hidden");
-  };
-
-  // Event listener for "Get Started" button
-  getStartedBtn.addEventListener("click", () => {
-    showModal();
-    signupBtn.click();
-  });
-
-  // Event listener for "Sign Up" button in navbar
-  signupModalBtn.addEventListener("click", () => {
-    showModal();
-    signupBtn.click();
-  });
-
-  // Switch to Signup form
-  signupBtn.addEventListener("click", () => {
-    loginForm.style.display = "none";
-    signupForm.style.display = "block";
-    sliderTab.style.left = "50%";
-  });
-
-  // Switch to Login form
-  loginBtn.addEventListener("click", () => {
-    signupForm.style.display = "none";
-    loginForm.style.display = "block";
-    sliderTab.style.left = "0%";
-  });
-
-  // Switch from Login to Signup using the link
-  signupLinkForm.addEventListener("click", (e) => {
-    e.preventDefault();
-    signupBtn.click();
-  });
-
-  // Close the modal when clicking outside
-  modal.addEventListener("click", (e) => {
-    if (!modalContent.contains(e.target)) {
-      hideModal();
+  // Fetch and display user data after login/signup
+  const fetchAndDisplayUserData = async (userId) => {
+    try {
+      const userDoc = await getDoc(doc(db, "profiles", userId));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        sessionStorage.setItem("resumeData", JSON.stringify(userData));
+        window.location.href = "long_form.html"; 
+      } else {
+        // No data yet; redirect to profile.html to let user fill their info
+        window.location.href = "profile.html";
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      window.location.href = "profile.html"; 
     }
-  });
+  };
+
+  // Check if user is already signed in from previous session
+  const checkExistingSession = () => {
+    const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
+    if (currentUser?.uid) {
+      // User already signed in, fetch data
+      fetchAndDisplayUserData(currentUser.uid);
+    }
+  };
 
   // Google SSO login handler
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
-      console.log("Google Login Success:", user);
       alert(`Welcome ${user.displayName}`);
       // Store user session info
       sessionStorage.setItem("currentUser", JSON.stringify({ uid: user.uid, email: user.email }));
-      hideModal();
-      window.location.href = "profile.html";
+      await fetchAndDisplayUserData(user.uid);
     } catch (error) {
       console.error("Google Login Error:", error);
       alert("Failed to sign in with Google.");
     }
   };
-
-  // Attach event listeners to Google login buttons
-  googleLoginBtns.forEach((btn) =>
-    btn.addEventListener("click", handleGoogleLogin)
-  );
 
   // Email/password signup handler
   const handleSignup = async (e) => {
@@ -133,10 +110,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      console.log("Signup Success:", userCredential.user);
       alert("Signup successful! Redirecting...");
-      // Store user session info
       sessionStorage.setItem("currentUser", JSON.stringify({ uid: userCredential.user.uid, email: userCredential.user.email }));
+      // No data yet, direct to profile to fill it
       window.location.href = "profile.html";
     } catch (error) {
       console.error("Signup Error:", error);
@@ -152,12 +128,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      console.log("Login Success:", userCredential.user);
       alert("Welcome back! Redirecting...");
-      // Store user session info
       sessionStorage.setItem("currentUser", JSON.stringify({ uid: userCredential.user.uid, email: userCredential.user.email }));
-      hideModal();
-      window.location.href = "profile.html";
+      await fetchAndDisplayUserData(userCredential.user.uid);
     } catch (error) {
       console.error("Login Error:", error);
       alert(error.message);
@@ -183,8 +156,47 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
-  // Attach event listeners to email auth buttons
+  // Event listeners
+  getStartedBtn.addEventListener("click", () => {
+    checkExistingSession();
+    showModal();
+    signupBtn.click();
+  });
+
+  signupModalBtn.addEventListener("click", () => {
+    checkExistingSession();
+    showModal();
+    signupBtn.click();
+  });
+
+  signupBtn.addEventListener("click", () => {
+    loginForm.style.display = "none";
+    signupForm.style.display = "block";
+    sliderTab.style.left = "50%";
+  });
+
+  loginBtn.addEventListener("click", () => {
+    signupForm.style.display = "none";
+    loginForm.style.display = "block";
+    sliderTab.style.left = "0%";
+  });
+
+  signupLinkForm.addEventListener("click", (e) => {
+    e.preventDefault();
+    signupBtn.click();
+  });
+
+  modal.addEventListener("click", (e) => {
+    if (!modalContent.contains(e.target)) {
+      hideModal();
+    }
+  });
+
+  googleLoginBtns.forEach((btn) => btn.addEventListener("click", handleGoogleLogin));
   emailAuthBtns.signup.addEventListener("click", handleSignup);
   emailAuthBtns.login.addEventListener("click", handleLogin);
   forgotPasswordLink.addEventListener("click", handlePasswordReset);
+
+  // Check if user is already signed in
+  checkExistingSession();
 });
