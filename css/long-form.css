@@ -339,14 +339,15 @@ select:valid {
 /* Summary View */
 .summary-view {
     display: none;
-    background: #ffffff;
-    border: 1px solid #ddd;
-    border-radius: 10px;
+    background: #1f1f1f; /* Dark background for modern aesthetic */
+    border-radius: 15px;
     padding: 2rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
     max-width: 900px;
     width: 90%;
-    text-align: left;
+    color: #ffffff; /* Light text for contrast */
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
 }
 
 /* When summary-active is applied */
@@ -367,35 +368,35 @@ select:valid {
     display: block;
 }
 
-/* Highlight accomplishment message */
+/* Gen Z Highlight for Accomplishment */
 .summary-view p1 {
-    display: block;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     font-weight: bold;
-    color: #ffffff;
-    background: linear-gradient(90deg, #ff8c00, #ff0080, #8000ff, #00ffff);
+    background: linear-gradient(90deg, #ff0080, #ffcd00, #00ff00, #00aaff, #ff0080);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    animation: flashyText 4s linear infinite;
+    animation: neonText 3s infinite alternate;
     text-align: center;
-    padding: 15px;
-    margin-bottom: 1.5rem;
+    padding: 1rem;
+    margin-bottom: 2rem;
     border: 2px solid transparent;
-    border-radius: 8px;
-    box-shadow: 0 0 20px rgba(255, 0, 255, 0.5), 0 0 10px rgba(0, 255, 255, 0.5);
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(255, 0, 128, 0.6), 0 0 15px rgba(0, 170, 255, 0.6);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
 }
 
 /* Flashy animation for p1 */
-@keyframes flashyText {
+@keyframes neonText {
     0% {
-        background-position: 0% 50%;
+        text-shadow: 0 0 5px #ff0080, 0 0 10px #ff0080, 0 0 20px #ff0080, 0 0 30px #ffcd00;
     }
     50% {
-        background-position: 100% 50%;
+        text-shadow: 0 0 10px #00aaff, 0 0 20px #00ff00, 0 0 30px #ff0080, 0 0 40px #ffcd00;
     }
     100% {
-        background-position: 0% 50%;
+        text-shadow: 0 0 5px #ffcd00, 0 0 10px #00ff00, 0 0 20px #00aaff, 0 0 30px #ff0080;
     }
 }
 
@@ -407,51 +408,68 @@ select:valid {
     margin: 0;
 }
 
-/* Add space between the heading and the button */
 .summary-view h2 {
+    font-size: 2rem;
+    color: #ffcd00;
+    text-transform: uppercase;
+    letter-spacing: 2px;
     margin-right: 1rem;
 }
 
-/* Edit information button */
+/* Gen Z Style for Edit Information Button */
 .edit-information {
-    background: #007bff;
+    background: linear-gradient(45deg, #ff0080, #ffcd00, #00ff00, #00aaff);
     font-weight: 600;
-    color: #fff;
+    color: #1f1f1f;
     border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 5px;
+    padding: 0.7rem 1.5rem;
+    border-radius: 30px;
     cursor: pointer;
     text-align: center;
-    vertical-align: middle;
-    float: right;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
 }
 
 .edit-information:hover {
-    background: #0056b3;
+    background: linear-gradient(45deg, #00aaff, #00ff00, #ffcd00, #ff0080);
+    box-shadow: 0 6px 20px rgba(255, 0, 128, 0.4);
+    transform: scale(1.05);
 }
 
 .summary-view p {
-    margin-bottom: 0.5rem;
-    line-height: 1.5;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #e0e0e0;
 }
 
 .summary-view h3 {
     margin-top: 2rem;
     margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: #00ff00;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+/* Glow effect for h3 */
+.summary-view h3 {
+    text-shadow: 0 0 10px #00ff00, 0 0 15px #00ff00;
 }
 
 /* Additional Responsive Adjustments */
 @media (max-width: 768px) {
-    .save-button, .next-button, .add-experience-btn, .add-education-btn, .add-link-btn {
-        width: 100%;
-    }
-
-    .sidebar {
-        width: 60px;
-    }
-
     .summary-view {
-        padding: 1rem;
+        padding: 1.5rem;
+    }
+
+    .summary-view p1 {
+        font-size: 1.2rem;
+        padding: 0.8rem;
+    }
+
+    .edit-information {
+        width: 100%;
     }
 }
 /* Footer */
