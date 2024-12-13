@@ -29,6 +29,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 sessionStorage.setItem("resumeData", JSON.stringify(data));
+                console.log(data);
                 populateFields(data);
             } else {
                 console.warn("No user data found in Firestore for user:", userId);
