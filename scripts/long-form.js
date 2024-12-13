@@ -182,54 +182,54 @@ document.addEventListener("DOMContentLoaded", async function () {
             }
         }
 
-    // Final "Save and Finish" button handler
-    if (target.classList.contains("save-button")) {
-        const data = gatherAllData();
-        const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
-        let docRef;
-
-        try {
-            if (currentUser && currentUser.uid) {
-                // User is logged in. Use setDoc with their uid to create/update doc
-                docRef = doc(db, "profiles", currentUser.uid);
-                await setDoc(docRef, data, { merge: true });
-                console.log("Document successfully written/updated for user:", currentUser.uid);
-            } else {
-                // No user logged in, add a new doc
-                docRef = await addDoc(collection(db, "profiles"), data);
-                console.log("Document successfully written to Firestore!");
-            }
+        // Final "Save and Finish" button handler
+        if (target.classList.contains("save-button")) {
+            const data = gatherAllData();
             
-            // Now fetch the newly saved document
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                const savedData = docSnap.data();
-                console.log("Retrieved data from Firestore:", savedData);
+            const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
+            let docRef;
 
-                // Store retrieved data in chrome.storage.local
-                chrome.storage.local.set({ userDataForFilling: savedData }, function() {
-                    if (chrome.runtime.lastError) {
-                        console.error('Error saving Firestore data to local storage:', chrome.runtime.lastError);
-                    } else {
-                        console.log('Firestore data saved in extension local storage for filling.');
-                        
-                        // Notify the extension that new data is available
-                        chrome.runtime.sendMessage({ action: "dataUpdated", payload: savedData }, (response) => {
-                            console.log("Extension notified:", response);
-                        });
-                    }
-                });
+            try {
+                if (currentUser && currentUser.uid) {
+                    // User is logged in. Use setDoc with their uid to create/update doc
+                    docRef = doc(db, "profiles", currentUser.uid);
+                    await setDoc(docRef, data, { merge: true });
+                    console.log("Document successfully written/updated for user:", currentUser.uid);
+                } else {
+                    // No user logged in, add a new doc
+                    docRef = await addDoc(collection(db, "profiles"), data);
+                    console.log("Document successfully written to Firestore!");
+                }
+                
+                // After writing data to Firestore, read it back
+                // If docRef is a DocumentReference (from setDoc), we have it directly
+                // If docRef is from addDoc, docRef is returned by addDoc and is a DocumentReference
+                const docSnap = await getDoc(docRef instanceof Function ? docRef() : docRef);
+                if (docSnap.exists()) {
+                    const savedData = docSnap.data();
+                    console.log("Retrieved data from Firestore:", savedData);
+                    chrome.runtime.sendMessage({ action: "dataUpdated", payload: savedData }, (response) => {
+                        console.log("Extension notified:", response);
+                    });
+                    // Store retrieved data in chrome.storage.local
+                    chrome.storage.local.set({ userDataForFilling: savedData }, function() {
+                        if (chrome.runtime.lastError) {
+                            console.error('Error saving Firestore data to local storage:', chrome.runtime.lastError);
+                        } else {
+                            console.log('Firestore data saved in extension local storage for filling.');
+                        }
+                    });
+                } else {
+                    console.error("No such document after saving!");
+                }
 
-            } else {
-                console.error("No such document after saving!");
+            } catch (e) {
+                console.error("Error adding/updating document to Firestore: ", e);
             }
-        } catch (e) {
-            console.error("Error adding/updating document to Firestore: ", e);
-        }
 
-        displaySummary(data);
-    }
-});
+            displaySummary(data);
+        }
+    });
 
     function clearFormFields(formContainer) {
         const inputs = formContainer.querySelectorAll("input, textarea, select");
