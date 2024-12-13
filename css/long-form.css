@@ -343,7 +343,7 @@ select:valid {
     border: 1px solid #ddd;
     border-radius: 10px;
     padding: 2rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     max-width: 900px;
     width: 90%;
     text-align: left;
@@ -367,7 +367,9 @@ select:valid {
     display: block;
 }
 
+/* Highlight accomplishment message */
 .summary-view p1 {
+    display: block;
     font-size: 1.2rem;
     font-weight: bold;
     color: #ffffff;
@@ -377,16 +379,24 @@ select:valid {
     -webkit-text-fill-color: transparent;
     animation: flashyText 4s linear infinite;
     text-align: center;
-    padding: 10px;
+    padding: 15px;
+    margin-bottom: 1.5rem;
     border: 2px solid transparent;
     border-radius: 8px;
     box-shadow: 0 0 20px rgba(255, 0, 255, 0.5), 0 0 10px rgba(0, 255, 255, 0.5);
 }
 
+/* Flashy animation for p1 */
 @keyframes flashyText {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 /* Align "Current Information" and "Edit information" in one line */
