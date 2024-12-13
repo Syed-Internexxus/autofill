@@ -208,8 +208,6 @@ document.addEventListener("DOMContentLoaded", async function () {
                 if (docSnap.exists()) {
                     const savedData = docSnap.data();
                     console.log("Retrieved data from Firestore:", savedData);
-                    // Instead of chrome.runtime.sendMessage directly, use window.postMessage
-                    window.postMessage({ action: "dataUpdated", payload: savedData }, "*");
                     // Store retrieved data in chrome.storage.local
                     chrome.storage.local.set({ userDataForFilling: savedData }, function() {
                         if (chrome.runtime.lastError) {
@@ -221,6 +219,9 @@ document.addEventListener("DOMContentLoaded", async function () {
                 } else {
                     console.error("No such document after saving!");
                 }
+                chrome.runtime.sendMessage(extensionid, { action: "dataUpdated", payload: savedData }, (response) => {
+                    console.log("Extension notified:", response);
+                });
 
             } catch (e) {
                 console.error("Error adding/updating document to Firestore: ", e);
