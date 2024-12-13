@@ -208,7 +208,8 @@ document.addEventListener("DOMContentLoaded", async function () {
                 if (docSnap.exists()) {
                     const savedData = docSnap.data();
                     console.log("Retrieved data from Firestore:", savedData);
-                    // Store retrieved data in chrome.storage.local
+                    
+                    // Store in extension's local storage
                     chrome.storage.local.set({ userDataForFilling: savedData }, function() {
                         if (chrome.runtime.lastError) {
                             console.error('Error saving Firestore data to local storage:', chrome.runtime.lastError);
@@ -216,12 +217,15 @@ document.addEventListener("DOMContentLoaded", async function () {
                             console.log('Firestore data saved in extension local storage for filling.');
                         }
                     });
-                } else {
-                    console.error("No such document after saving!");
+
+                    // Send message to extension with the updated data
+                    chrome.runtime.sendMessage(extensionid, { 
+                        action: "dataUpdated", 
+                        payload: savedData 
+                    }, (response) => {
+                        console.log("Extension notified:", response);
+                    });
                 }
-                chrome.runtime.sendMessage(extensionid, { action: "dataUpdated", payload: savedData }, (response) => {
-                    console.log("Extension notified:", response);
-                });
 
             } catch (e) {
                 console.error("Error adding/updating document to Firestore: ", e);
