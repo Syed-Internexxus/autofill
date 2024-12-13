@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     // Firebase Imports
     const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js");
     const { getAuth, GoogleAuthProvider } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js");
-    const { getFirestore, collection, addDoc, doc, setDoc } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js");
+    const { getFirestore, collection, addDoc, doc, setDoc, getDoc } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js");
 
     // Firebase configuration
     const firebaseConfig = {
