@@ -369,7 +369,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     function populateFields(data) {
-        // No changes to populateFields code - remains identical
+        // Helper function to safely retrieve values from either old or new keys
+        const getVal = (oldKey, newKey) => data[oldKey] || data[newKey] || "";
+    
         const firstName = document.getElementById("first-name");
         const lastName = document.getElementById("last-name");
         const primaryPhone = document.getElementById("primary-phone");
@@ -377,108 +379,106 @@ document.addEventListener("DOMContentLoaded", async function () {
         const primaryEmail = document.getElementById("primary-email");
         const backupEmail = document.getElementById("backup-email");
         const location = document.getElementById("location");
-
-        if (firstName) firstName.value = data["First Name"] || "";
-        if (lastName) lastName.value = data["Last Name"] || "";
-        if (primaryPhone) primaryPhone.value = data["Contact Number"] || "";
-        if (secondaryPhone) secondaryPhone.value = data["Secondary Number"] || "";
-        if (primaryEmail) primaryEmail.value = data["Email"] || "";
-        if (backupEmail) backupEmail.value = data["Backup Email"] || "";
-        if (location) location.value = data["Location"] || "";
-
-        const educationData = data["Education"] || [];
+    
+        if (firstName) firstName.value = getVal("First Name", "firstName");
+        if (lastName) lastName.value = getVal("Last Name", "lastName");
+        if (primaryPhone) primaryPhone.value = getVal("Contact Number", "primaryPhone");
+        if (secondaryPhone) secondaryPhone.value = getVal("Secondary Number", "secondaryPhone");
+        if (primaryEmail) primaryEmail.value = getVal("Email", "primaryEmail");
+        if (backupEmail) backupEmail.value = getVal("Backup Email", "backupEmail");
+        if (location) location.value = getVal("Location", "location");
+    
+        // Handle Education
+        const educationData = data["Education"] || data["educations"] || [];
         const firstEdu = educationData[0];
         const eduForm = document.querySelector(".education-form");
-        if (eduForm) {
+        if (eduForm && firstEdu) {
             const schoolName = eduForm.querySelector("#school-name");
             const degree = eduForm.querySelector("#degree");
             const eduStart = eduForm.querySelector("#edu-start-date");
             const eduEnd = eduForm.querySelector("#edu-end-date");
             const gpa = eduForm.querySelector("#gpa");
             const details = eduForm.querySelector("#details");
-
-            if (firstEdu) {
-                if (schoolName) schoolName.value = firstEdu.school_name || "";
-                if (degree) degree.value = firstEdu.degree || "";
-                if (eduStart) eduStart.value = firstEdu.start_date || "";
-                if (eduEnd) eduEnd.value = firstEdu.end_date || "";
-                if (gpa) gpa.value = firstEdu.gpa || "";
-                if (details) details.value = firstEdu.details || "";
-            }
-
+    
+            if (schoolName) schoolName.value = firstEdu.school_name || "";
+            if (degree) degree.value = firstEdu.degree || "";
+            if (eduStart) eduStart.value = firstEdu.start_date || "";
+            if (eduEnd) eduEnd.value = firstEdu.end_date || "";
+            if (gpa) gpa.value = firstEdu.gpa || "";
+            if (details) details.value = firstEdu.details || "";
+    
             for (let i = 1; i < educationData.length; i++) {
                 addEducationSection(educationData[i]);
             }
         }
-
-        const experienceData = data["experience"] || [];
+    
+        // Handle Experience
+        const experienceData = data["experience"] || data["experiences"] || [];
         const firstExp = experienceData[0];
         const workForm = document.querySelector(".work-form");
-        if (workForm) {
+        if (workForm && firstExp) {
             const companyName = workForm.querySelector("#company-name");
             const jobTitle = workForm.querySelector("#job-title");
             const workStart = workForm.querySelector("#start-date");
             const workEnd = workForm.querySelector("#end-date");
             const workLocation = workForm.querySelector("#work-location");
             const responsibilities = workForm.querySelector("#responsibilities");
-
-            if (firstExp) {
-                if (companyName) companyName.value = firstExp.company || "";
-                if (jobTitle) jobTitle.value = firstExp.title || "";
-                if (workStart) workStart.value = firstExp.start_date || "";
-                if (workEnd) workEnd.value = firstExp.end_date || "";
-                if (workLocation) workLocation.value = firstExp.location || "";
-                if (responsibilities) responsibilities.value = firstExp.description || "";
-            }
-
+    
+            if (companyName) companyName.value = firstExp.company || "";
+            if (jobTitle) jobTitle.value = firstExp.title || "";
+            if (workStart) workStart.value = firstExp.start_date || "";
+            if (workEnd) workEnd.value = firstExp.end_date || "";
+            if (workLocation) workLocation.value = firstExp.location || "";
+            if (responsibilities) responsibilities.value = firstExp.description || "";
+    
             for (let i = 1; i < experienceData.length; i++) {
                 addExperienceSection(experienceData[i]);
             }
         }
-
-        if (data["core_skills"]) {
-            data["core_skills"].split(",").forEach((skill) => addSkillTag(skill.trim()));
+    
+        // Handle Skills
+        const coreSkills = data["core_skills"] || data["skills"];
+        if (coreSkills) {
+            const skillArray = Array.isArray(coreSkills) ? coreSkills : coreSkills.split(",").map(s => s.trim());
+            skillArray.forEach((skill) => addSkillTag(skill));
         }
-
-        const linkData = data["Links"] || [];
+    
+        // Handle Links
+        const linkData = data["Links"] || data["links"] || [];
         const linkForm = document.querySelector(".link-form");
-        if (linkForm) {
+        if (linkForm && linkData.length > 0) {
             const linkTypeSelect = linkForm.querySelector("#link-type");
             const linkUrl = linkForm.querySelector("#link-url");
             const firstLink = linkData[0];
             if (firstLink) {
-                if (linkTypeSelect) {
-                    linkTypeSelect.value = firstLink.type || "";
-                }
-                if (linkUrl) {
-                    linkUrl.value = firstLink.url || "";
-                }
+                if (linkTypeSelect) linkTypeSelect.value = firstLink.type || "";
+                if (linkUrl) linkUrl.value = firstLink.url || "";
             }
-
+    
             for (let i = 1; i < linkData.length; i++) {
                 addLinkSection(linkData[i]);
             }
         }
-
+    
+        // EEO & Work Authorization
         const eeoFields = [
-            {id: "authorized-to-work", key: "Authorized to Work"},
-            {id: "require-sponsorship", key: "Require Sponsorship"},
-            {id: "gender-identity", key: "Gender Identity"},
-            {id: "preferred-pronouns", key: "Preferred Pronouns"},
-            {id: "lgbtqia", key: "LGBTQIA"},
-            {id: "racial-identity", key: "Racial Identity"},
-            {id: "hispanic", key: "Hispanic"},
-            {id: "disability", key: "Disability"},
-            {id: "veteran-status", key: "Veteran Status"}
+            {id: "authorized-to-work", oldKey: "Authorized to Work", newKey: "authorized"},
+            {id: "require-sponsorship", oldKey: "Require Sponsorship", newKey: "requireSponsorship"},
+            {id: "gender-identity", oldKey: "Gender Identity", newKey: "genderIdentity"},
+            {id: "preferred-pronouns", oldKey: "Preferred Pronouns", newKey: "preferredPronouns"},
+            {id: "lgbtqia", oldKey: "LGBTQIA", newKey: "lgbtqia"},
+            {id: "racial-identity", oldKey: "Racial Identity", newKey: "racialIdentity"},
+            {id: "hispanic", oldKey: "Hispanic", newKey: "hispanic"},
+            {id: "disability", oldKey: "Disability", newKey: "disability"},
+            {id: "veteran-status", oldKey: "Veteran Status", newKey: "veteranStatus"}
         ];
-
+    
         eeoFields.forEach(field => {
             const elem = document.getElementById(field.id);
-            if (elem && data[field.key]) {
-                elem.value = data[field.key];
-            }
+            if (elem) elem.value = data[field.oldKey] || data[field.newKey] || "";
         });
     }
+    
 
     function gatherAllData() {
         const data = {};
