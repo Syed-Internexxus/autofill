@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         sessionStorage.setItem("resumeData", JSON.stringify(userData));
         window.location.href = "long_form.html"; 
       } else {
-        // No data yet; redirect to profile.html to let user fill their info
+        // No data yet; redirect to profile.html so user can fill their info
         window.location.href = "profile.html";
       }
     } catch (error) {

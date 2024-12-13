@@ -23,43 +23,41 @@ document.addEventListener("DOMContentLoaded", async function () {
     const db = getFirestore(app);
     // ===== FIREBASE CONFIGURATION END =====
 
-        // Retrieve current user and data if available
-        const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
-
-        const populateFieldsFromFirestore = async (userId) => {
-            try {
-                const docSnap = await getDoc(doc(db, "profiles", userId));
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    sessionStorage.setItem("resumeData", JSON.stringify(data));
-                    populateFields(data);
-                } else {
-                    console.warn("No user data found in Firestore for user:", userId);
-                    // User logged in but no data yet, fields remain blank until saved
-                }
-            } catch (error) {
-                console.error("Error fetching user data:", error);
+    const populateFieldsFromFirestore = async (userId) => {
+        try {
+            const docSnap = await getDoc(doc(db, "profiles", userId));
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                sessionStorage.setItem("resumeData", JSON.stringify(data));
+                populateFields(data);
+            } else {
+                console.warn("No user data found in Firestore for user:", userId);
+                // User logged in but no data yet, fields remain blank until saved
             }
-        };
-    
-        if (currentUser?.uid) {
-            // User is logged in, fetch their data from Firestore
-            await populateFieldsFromFirestore(currentUser.uid);
-        } else {
-            // If user is not logged in, check if resumeData is in sessionStorage
-            let resumeData;
-            try {
-                resumeData = JSON.parse(sessionStorage.getItem("resumeData"));
-            } catch (error) {
-                console.error("Invalid JSON in sessionStorage:", error);
-                resumeData = null;
-            }
-    
-            if (resumeData) {
-                populateFields(resumeData);
-            }
+        } catch (error) {
+            console.error("Error fetching user data:", error);
         }
-        
+    };
+
+    const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
+    if (currentUser?.uid) {
+        // User is logged in, fetch their data from Firestore
+        await populateFieldsFromFirestore(currentUser.uid);
+    } else {
+        // If user is not logged in, check if resumeData is in sessionStorage
+        let resumeData;
+        try {
+            resumeData = JSON.parse(sessionStorage.getItem("resumeData"));
+        } catch (error) {
+            console.error("Invalid JSON in sessionStorage:", error);
+            resumeData = null;
+        }
+
+        if (resumeData) {
+            populateFields(resumeData);
+        }
+    }
+
     const sections = document.querySelectorAll(".form-section");
     const sidebarItems = document.querySelectorAll(".sidebar-item");
     const nextButtons = document.querySelectorAll(".next-button");
