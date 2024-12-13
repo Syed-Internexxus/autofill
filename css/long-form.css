@@ -367,6 +367,28 @@ select:valid {
     display: block;
 }
 
+.summary-view p1 {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #ffffff;
+    background: linear-gradient(90deg, #ff8c00, #ff0080, #8000ff, #00ffff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: flashyText 4s linear infinite;
+    text-align: center;
+    padding: 10px;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.5), 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+@keyframes flashyText {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
 /* Align "Current Information" and "Edit information" in one line */
 .summary-view h2,
 .summary-view .edit-information {

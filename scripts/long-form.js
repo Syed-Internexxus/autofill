@@ -587,8 +587,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         profileForm.classList.add("summary-active");
 
         let html = `
-            <h1>Profile Summary</h1>
-            <p>Review your information below. Click 'Edit information' to make changes. You can now return to the plugin to start autofilling jobs</p>
+            <p1>Review your information below. Click 'Edit information' to make changes. You can now return to the plugin to start autofilling jobs</p1>
             <h2>Current Information</h2>
             <button class="edit-information">Edit information</button>
             <h3>Personal Information</h3>
