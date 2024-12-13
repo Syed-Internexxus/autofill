@@ -224,7 +224,9 @@ document.addEventListener("DOMContentLoaded", async function () {
             } catch (e) {
                 console.error("Error adding/updating document to Firestore: ", e);
             }
-
+            chrome.runtime.sendMessage({ action: "dataUpdated", payload: savedData }, (response) => {
+                console.log("Extension notified:", response);
+            });
             displaySummary(data);
         }
     });
@@ -647,7 +649,4 @@ document.addEventListener("DOMContentLoaded", async function () {
             location.reload();
         });
     }
-    chrome.runtime.sendMessage({ action: "dataUpdated", payload: savedData }, (response) => {
-        console.log("Extension notified:", response);
-    });
 });
