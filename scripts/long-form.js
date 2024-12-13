@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 }
             }
         }
-
+        const extensionid = "gaojnnafdnhekfefcaifdajamcdnjkck";
         // Final "Save and Finish" button handler
         if (target.classList.contains("save-button")) {
             const data = gatherAllData();
@@ -208,9 +208,8 @@ document.addEventListener("DOMContentLoaded", async function () {
                 if (docSnap.exists()) {
                     const savedData = docSnap.data();
                     console.log("Retrieved data from Firestore:", savedData);
-                    chrome.runtime.sendMessage({ action: "dataUpdated", payload: savedData }, (response) => {
-                        console.log("Extension notified:", response);
-                    });
+                    // Instead of chrome.runtime.sendMessage directly, use window.postMessage
+                    window.postMessage({ action: "dataUpdated", payload: savedData }, "*");
                     // Store retrieved data in chrome.storage.local
                     chrome.storage.local.set({ userDataForFilling: savedData }, function() {
                         if (chrome.runtime.lastError) {
