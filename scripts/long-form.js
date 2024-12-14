@@ -182,50 +182,42 @@ if (target.classList.contains("save-btn")) {
     }
 }
 
-    // Final "Save and Finish" button handler
-    if (target.classList.contains("save-button")) {
-        const data = gatherAllData();
+// Final "Save and Finish" button handler
+if (target.classList.contains("save-button")) {
+    const data = gatherAllData();
 
-        const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
-        let docRef;
+    const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
+    let docRef;
 
-        try {
-            if (currentUser && currentUser.uid) {
-                // User is logged in. Use setDoc with their uid to create/update doc
-                docRef = doc(db, "profiles", currentUser.uid);
-                await setDoc(docRef, data, { merge: true });
-                console.log("Document successfully written/updated for user:", currentUser.uid);
-            } else {
-                // No user logged in, add a new doc
-                docRef = await addDoc(collection(db, "profiles"), data);
-                console.log("Document successfully written to Firestore!");
-            }
-
-            // After writing data to Firestore, read it back
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                const savedData = docSnap.data();
-                console.log("Retrieved data from Firestore:", savedData);
-
-                // Send message directly to the extension using the provided extension ID
-                chrome.runtime.sendMessage("gaojnnafdnhekfefcaifdajamcdnjkck", { 
-                    action: "dataUpdated", 
-                    payload: savedData 
-                }, (response) => {
-                    console.log("Extension notified:", response);
-                });
-
-            } else {
-                console.error("No such document after saving!");
-            }
-        } catch (e) {
-            console.error("Error adding/updating document to Firestore: ", e);
+    try {
+        if (currentUser && currentUser.uid) {
+            // User is logged in. Use setDoc with their uid to create/update doc
+            docRef = doc(db, "profiles", currentUser.uid);
+            await setDoc(docRef, data, { merge: true });
+            console.log("Document successfully written/updated for user:", currentUser.uid);
+        } else {
+            // No user logged in, add a new doc
+            docRef = await addDoc(collection(db, "profiles"), data);
+            console.log("Document successfully written to Firestore!");
         }
 
-        displaySummary(data);
+        // After writing data to Firestore, read it back
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            const savedData = docSnap.data();
+            console.log("Retrieved data from Firestore:", savedData);
+            
+            // Post the message to the window for the content script to pick up
+            window.postMessage({ action: "dataUpdated", payload: savedData }, "*");
+        } else {
+            console.error("No such document after saving!");
+        }
+    } catch (e) {
+        console.error("Error adding/updating document to Firestore: ", e);
     }
 
-
+    displaySummary(data);
+}
     });
 
     function clearFormFields(formContainer) {
