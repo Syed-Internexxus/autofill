@@ -181,48 +181,50 @@ document.addEventListener("DOMContentLoaded", async function () {
                 }
             }
         }
-        const extensionid = "gaojnnafdnhekfefcaifdajamcdnjkck";
-        // Final "Save and Finish" button handler
-        if (target.classList.contains("save-button")) {
-            const data = gatherAllData();
-            
-            const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
-            let docRef;
+            //Final "Save and Finish" button handler
+    if (target.classList.contains("save-button")) {
+        const data = gatherAllData();
 
-            try {
-                if (currentUser && currentUser.uid) {
-                    // User is logged in. Use setDoc with their uid to create/update doc
-                    docRef = doc(db, "profiles", currentUser.uid);
-                    await setDoc(docRef, data, { merge: true });
-                    console.log("Document successfully written/updated for user:", currentUser.uid);
-                } else {
-                    // No user logged in, add a new doc
-                    docRef = await addDoc(collection(db, "profiles"), data);
-                    console.log("Document successfully written to Firestore!");
-                }
-                
-                // After writing data to Firestore, read it back
-                // If docRef is a DocumentReference (from setDoc), we have it directly
-                // If docRef is from addDoc, docRef is returned by addDoc and is a DocumentReference
-                const docSnap = await getDoc(docRef instanceof Function ? docRef() : docRef);
-                if (docSnap.exists()) {
-                    const savedData = docSnap.data();
-                    console.log("Retrieved data from Firestore:", savedData);
-                    
-                    // Send message to extension with the updated data
-                    chrome.runtime.sendMessage(extensionid, { 
-                        action: "dataUpdated", 
-                        payload: savedData 
-                    }, (response) => {
-                        console.log("Extension notified:", response);
-                    });
-                }
-            } catch (e) {
-                console.error("Error adding/updating document to Firestore: ", e);
+        const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
+        let docRef;
+
+        try {
+            if (currentUser && currentUser.uid) {
+                // User is logged in. Use setDoc with their uid to create/update doc
+                docRef = doc(db, "profiles", currentUser.uid);
+                await setDoc(docRef, data, { merge: true });
+                console.log("Document successfully written/updated for user:", currentUser.uid);
+            } else {
+                // No user logged in, add a new doc
+                docRef = await addDoc(collection(db, "profiles"), data);
+                console.log("Document successfully written to Firestore!");
             }
+            
+            // After writing data to Firestore, read it back
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const savedData = docSnap.data();
+                console.log("Retrieved data from Firestore:", savedData);
 
-            displaySummary(data);
+                const extensionId = "gaojnnafdnhekfefcaifdajamcdnjkck"; // Ensure this is correct
+
+                // Send message to extension with the updated data
+                chrome.runtime.sendMessage(extensionId, {
+                    action: "dataUpdated",
+                    payload: savedData
+                }, (response) => {
+                    console.log("Extension notified:", response);
+                });
+            } else {
+                console.error("No such document after saving!");
+            }
+        } catch (e) {
+            console.error("Error adding/updating document to Firestore: ", e);
         }
+
+        displaySummary(data);
+    }
+
     });
 
     function clearFormFields(formContainer) {
