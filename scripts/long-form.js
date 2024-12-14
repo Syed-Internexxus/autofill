@@ -159,28 +159,29 @@ document.addEventListener("DOMContentLoaded", async function () {
             }
         }
 
-        // Toggle Save/Edit on each section
-        if (target.classList.contains("save-btn")) {
-            const parentEntry = target.closest(".education-entry, .work-entry, .link-entry, .education-form, .work-form, .link-form");
-            if (parentEntry) {
-                const inputs = parentEntry.querySelectorAll("input, textarea, select");
-                const isDisabled = Array.from(inputs).some(input => input.disabled);
+// Toggle Save/Edit on each section
+if (target.classList.contains("save-btn")) {
+    const parentEntry = target.closest(".education-entry, .work-entry, .link-entry, .education-form, .work-form, .link-form");
+    if (parentEntry) {
+        const inputs = parentEntry.querySelectorAll("input, textarea, select");
+        const isDisabled = Array.from(inputs).some(input => input.disabled);
 
-                if (isDisabled) {
-                    // Currently in 'view' mode -> Switch to 'edit' mode
-                    inputs.forEach((input) => {
-                        input.removeAttribute("disabled");
-                    });
-                    target.textContent = "Save";
-                } else {
-                    // Currently in 'edit' mode -> Switch to 'view' mode
-                    inputs.forEach((input) => {
-                        input.setAttribute("disabled", true);
-                    });
-                    target.textContent = "Edit";
-                }
-            }
+        if (isDisabled) {
+            // Currently in 'view' mode -> Switch to 'edit' mode
+            inputs.forEach((input) => {
+                input.removeAttribute("disabled");
+            });
+            target.textContent = "Save";
+        } else {
+            // Currently in 'edit' mode -> Switch to 'view' mode
+            inputs.forEach((input) => {
+                input.setAttribute("disabled", true);
+            });
+            target.textContent = "Edit";
         }
+    }
+}
+
     // Final "Save and Finish" button handler
     if (target.classList.contains("save-button")) {
         const data = gatherAllData();
@@ -205,9 +206,15 @@ document.addEventListener("DOMContentLoaded", async function () {
             if (docSnap.exists()) {
                 const savedData = docSnap.data();
                 console.log("Retrieved data from Firestore:", savedData);
-                
-                // Just post the message to the window
-                window.postMessage({ action: "dataUpdated", payload: savedData }, "*");
+
+                // Send message directly to the extension using the provided extension ID
+                chrome.runtime.sendMessage("gaojnnafdnhekfefcaifdajamcdnjkck", { 
+                    action: "dataUpdated", 
+                    payload: savedData 
+                }, (response) => {
+                    console.log("Extension notified:", response);
+                });
+
             } else {
                 console.error("No such document after saving!");
             }
