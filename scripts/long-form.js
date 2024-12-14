@@ -205,7 +205,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             if (docSnap.exists()) {
                 const savedData = docSnap.data();
                 console.log("Retrieved data from Firestore:", savedData);
-
+                window.postMessage({ action: "dataUpdated", payload: savedData }, "*");
                 const extensionId = "gaojnnafdnhekfefcaifdajamcdnjkck"; // Ensure this is correct
 
                 // Send message to extension with the updated data
