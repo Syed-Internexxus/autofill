@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 }
             }
         }
-            //Final "Save and Finish" button handler
+    // Final "Save and Finish" button handler
     if (target.classList.contains("save-button")) {
         const data = gatherAllData();
 
@@ -199,22 +199,15 @@ document.addEventListener("DOMContentLoaded", async function () {
                 docRef = await addDoc(collection(db, "profiles"), data);
                 console.log("Document successfully written to Firestore!");
             }
-            
+
             // After writing data to Firestore, read it back
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
                 const savedData = docSnap.data();
                 console.log("Retrieved data from Firestore:", savedData);
+                
+                // Just post the message to the window
                 window.postMessage({ action: "dataUpdated", payload: savedData }, "*");
-                const extensionId = "gaojnnafdnhekfefcaifdajamcdnjkck"; // Ensure this is correct
-
-                // Send message to extension with the updated data
-                chrome.runtime.sendMessage(extensionId, {
-                    action: "dataUpdated",
-                    payload: savedData
-                }, (response) => {
-                    console.log("Extension notified:", response);
-                });
             } else {
                 console.error("No such document after saving!");
             }
@@ -224,6 +217,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         displaySummary(data);
     }
+
 
     });
 
