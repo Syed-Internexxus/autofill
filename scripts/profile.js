@@ -2,6 +2,21 @@ const fileInput = document.getElementById("resume-upload");
 const uploadLabel = document.querySelector(".upload-text");
 const nextButton = document.getElementById("next-button");
 const manualEntry = document.querySelector(".manual-entry");
+const loader = document.getElementById("loader"); // Select the loader element
+
+// Function to hide the loader
+const hideLoader = () => {
+    loader.style.transition = 'opacity 0.5s ease';
+    loader.style.opacity = '0';
+    setTimeout(() => {
+        loader.style.display = 'none';
+    }, 500); // Match the transition duration
+};
+
+// Hide the loader once the DOM is fully loaded
+document.addEventListener("DOMContentLoaded", () => {
+    hideLoader();
+});
 
 // Update label when a file is selected
 fileInput.addEventListener("change", (event) => {
@@ -62,16 +77,22 @@ nextButton.addEventListener("click", async () => {
     }
 
     try {
+        // Show the loader when processing starts
+        loader.style.display = 'flex';
+        loader.style.opacity = '1';
+
         const fileBase64 = await fileToBase64(file);
         const fileType = file.name.split(".").pop().toLowerCase(); // Extract file extension
         if (!["pdf", "doc", "docx"].includes(fileType)) {
             alert("Only PDF, DOC, or DOCX files are supported. Please upload a valid file.");
+            hideLoader(); // Hide loader if invalid file
             return;
         }
         await sendResumeData(fileBase64, fileType);
     } catch (error) {
         console.error("Error reading file:", error);
         alert("There was an error reading the file. Please try again.");
+        hideLoader(); // Hide loader in case of error
     }
 });
 
@@ -80,6 +101,12 @@ manualEntry.addEventListener("click", () => {
     // Clear any stored data in sessionStorage
     sessionStorage.removeItem("resumeData");
 
-    // Redirect to long_form.html
-    window.location.href = "long_form.html";
+    // Show the loader before redirection
+    loader.style.display = 'flex';
+    loader.style.opacity = '1';
+
+    // Redirect to long_form.html after showing loader briefly
+    setTimeout(() => {
+        window.location.href = "long_form.html";
+    }, 500); // Adjust the timeout as needed
 });
