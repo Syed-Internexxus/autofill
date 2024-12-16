@@ -4,27 +4,42 @@ const nextButton = document.getElementById("next-button");
 const manualEntry = document.querySelector(".manual-entry");
 const loader = document.getElementById("loader"); // Select the loader element
 const logoutLink = document.getElementById("logout-link");
+
 // Function to hide the loader
 const hideLoader = () => {
-    loader.style.transition = 'opacity 0.5s ease';
     loader.style.opacity = '0';
     setTimeout(() => {
         loader.style.display = 'none';
-    }, 500); // Match the transition duration
+    }, 500); // Duration should match the CSS transition
 };
 
+// Function to show the loader
+const showLoader = () => {
+    loader.style.display = 'flex';
+    // Allow some time for display:flex to apply before changing opacity
+    setTimeout(() => {
+        loader.style.opacity = '1';
+    }, 10);
+};
+
+// Function to handle logout
 const logout = () => {
     // Optional: Confirm logout action
     const confirmLogout = confirm("Are you sure you want to logout?");
     if (!confirmLogout) return;
+
+    // Show the loader
+    showLoader();
 
     // Clear all session data
     sessionStorage.clear(); // Clears all data in sessionStorage
     // If you're using localStorage for any data, clear it as well:
     // localStorage.clear();
 
-    // Redirect to index.html
-    window.location.href = "index.html";
+    // Redirect to index.html after a short delay to show loader
+    setTimeout(() => {
+        window.location.href = "index.html"; // Change to your login/home page if different
+    }, 1000); // 1 second delay; adjust as needed
 };
 
 // Attach the logout function to the Logout link's click event
@@ -32,6 +47,7 @@ logoutLink.addEventListener("click", (event) => {
     event.preventDefault(); // Prevent default link behavior
     logout();
 });
+
 // Hide the loader once the DOM is fully loaded
 document.addEventListener("DOMContentLoaded", () => {
     hideLoader();
@@ -83,6 +99,7 @@ const sendResumeData = async (base64File, fileType) => {
     } catch (error) {
         console.error("Error processing resume:", error);
         alert("There was an error processing your resume. Please try again.");
+        hideLoader(); // Hide loader in case of error
     }
 };
 
@@ -97,8 +114,7 @@ nextButton.addEventListener("click", async () => {
 
     try {
         // Show the loader when processing starts
-        loader.style.display = 'flex';
-        loader.style.opacity = '1';
+        showLoader();
 
         const fileBase64 = await fileToBase64(file);
         const fileType = file.name.split(".").pop().toLowerCase(); // Extract file extension
@@ -117,12 +133,11 @@ nextButton.addEventListener("click", async () => {
 
 // Manual entry redirection
 manualEntry.addEventListener("click", () => {
+    // Show the loader before redirection
+    showLoader();
+
     // Clear any stored data in sessionStorage
     sessionStorage.removeItem("resumeData");
-
-    // Show the loader before redirection
-    loader.style.display = 'flex';
-    loader.style.opacity = '1';
 
     // Redirect to long_form.html after showing loader briefly
     setTimeout(() => {
