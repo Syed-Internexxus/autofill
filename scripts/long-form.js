@@ -23,47 +23,21 @@ document.addEventListener("DOMContentLoaded", async function () {
     const db = getFirestore(app);
     // ===== FIREBASE CONFIGURATION END =====
 
-    const populateFieldsFromFirestore = async (userId) => {
-        try {
-            const docSnap = await getDoc(doc(db, "profiles", userId));
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                sessionStorage.setItem("resumeData", JSON.stringify(data));
-                console.log(data);
-                populateFields(data);
-            } else {
-                console.warn("No user data found in Firestore for user:", userId);
-                // User logged in but no data yet, fields remain blank until saved
-            }
-        } catch (error) {
-            console.error("Error fetching user data:", error);
-        }
-    };
-
-    const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
-    if (currentUser?.uid) {
-        // User is logged in, fetch their data from Firestore
-        await populateFieldsFromFirestore(currentUser.uid);
-    } else {
-        // If user is not logged in, check if resumeData is in sessionStorage
-        let resumeData;
-        try {
-            resumeData = JSON.parse(sessionStorage.getItem("resumeData"));
-        } catch (error) {
-            console.error("Invalid JSON in sessionStorage:", error);
-            resumeData = null;
-        }
-
-        if (resumeData) {
-            populateFields(resumeData);
-        }
-    }
-
+    // Initialize Elements and Variables
     const sections = document.querySelectorAll(".form-section");
     const sidebarItems = document.querySelectorAll(".sidebar-item");
     const nextButtons = document.querySelectorAll(".next-button");
     const logoutLink = document.getElementById("logout-link");
     let currentSectionIndex = 0;
+
+    // Initialize Skills Tags Container
+    const skillsTagsContainer = document.querySelector(".skills-tags");
+
+    if (!skillsTagsContainer) {
+        console.error("Element with class 'skills-tags' not found. Please ensure it exists in the HTML.");
+    }
+
+    // Logout Functionality
     const logout = () => {
         // Optional: Confirm logout action
         const confirmLogout = confirm("Are you sure you want to logout?");
@@ -84,7 +58,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         logout();
     });
 
-
+    // Function to Show Specific Section
     function showSection(index) {
         sections.forEach((section, i) => {
             section.classList.toggle("active", i === index);
@@ -95,12 +69,14 @@ document.addEventListener("DOMContentLoaded", async function () {
         currentSectionIndex = index;
     }
 
+    // Sidebar Items Click Event
     sidebarItems.forEach((item, index) => {
         item.addEventListener("click", () => {
             showSection(index);
         });
     });
 
+    // Next Buttons Click Event
     nextButtons.forEach((button) => {
         button.addEventListener("click", () => {
             if (currentSectionIndex < sections.length - 1) {
@@ -109,11 +85,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
     });
 
+    // Show Initial Section
     showSection(0);
 
-    // Skills Section
+    // Skills Section Elements
     const newSkillInput = document.getElementById("new-skill");
-    const skillsTagsContainer = document.querySelector(".skills-tags");
 
     if (newSkillInput) {
         newSkillInput.addEventListener("keydown", (event) => {
@@ -125,7 +101,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
     }
 
+    // Function to Add a Skill Tag
     function addSkillTag(skill) {
+        if (!skillsTagsContainer) {
+            console.error("skillsTagsContainer is not initialized.");
+            return;
+        }
+
         const tag = document.createElement("span");
         tag.classList.add("skill-tag");
         tag.textContent = skill;
@@ -148,6 +130,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         skillsTagsContainer.appendChild(tag);
     }
 
+    // Document Body Click Event Listener
     document.body.addEventListener("click", async (event) => {
         const target = event.target;
 
@@ -180,67 +163,68 @@ document.addEventListener("DOMContentLoaded", async function () {
             }
         }
 
-// Toggle Save/Edit on each section
-if (target.classList.contains("save-btn")) {
-    const parentEntry = target.closest(".education-entry, .work-entry, .link-entry, .education-form, .work-form, .link-form");
-    if (parentEntry) {
-        const inputs = parentEntry.querySelectorAll("input, textarea, select");
-        const isDisabled = Array.from(inputs).some(input => input.disabled);
-
-        if (isDisabled) {
-            // Currently in 'view' mode -> Switch to 'edit' mode
-            inputs.forEach((input) => {
-                input.removeAttribute("disabled");
-            });
-            target.textContent = "Save";
-        } else {
-            // Currently in 'edit' mode -> Switch to 'view' mode
-            inputs.forEach((input) => {
-                input.setAttribute("disabled", true);
-            });
-            target.textContent = "Edit";
-        }
-    }
-}
-
-// Final "Save and Finish" button handler
-if (target.classList.contains("save-button")) {
-    const data = gatherAllData();
-
-    const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
-    let docRef;
-
-    try {
-        if (currentUser && currentUser.uid) {
-            // User is logged in. Use setDoc with their uid to create/update doc
-            docRef = doc(db, "profiles", currentUser.uid);
-            await setDoc(docRef, data, { merge: true });
-            console.log("Document successfully written/updated for user:", currentUser.uid);
-        } else {
-            // No user logged in, add a new doc
-            docRef = await addDoc(collection(db, "profiles"), data);
-            console.log("Document successfully written to Firestore!");
+        // Toggle Save/Edit on each section
+        if (target.classList.contains("save-btn")) {
+            const parentEntry = target.closest(".education-entry, .work-entry, .link-entry, .education-form, .work-form, .link-form");
+            if (parentEntry) {
+                const inputs = parentEntry.querySelectorAll("input, textarea, select");
+                const isDisabled = Array.from(inputs).some(input => input.disabled);
+        
+                if (isDisabled) {
+                    // Currently in 'view' mode -> Switch to 'edit' mode
+                    inputs.forEach((input) => {
+                        input.removeAttribute("disabled");
+                    });
+                    target.textContent = "Save";
+                } else {
+                    // Currently in 'edit' mode -> Switch to 'view' mode
+                    inputs.forEach((input) => {
+                        input.setAttribute("disabled", true);
+                    });
+                    target.textContent = "Edit";
+                }
+            }
         }
 
-        // After writing data to Firestore, read it back
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            const savedData = docSnap.data();
-            console.log("Retrieved data from Firestore:", savedData);
-            
-            // Post the message to the window for the content script to pick up
-            window.postMessage({ action: "dataUpdated", payload: savedData }, "*");
-        } else {
-            console.error("No such document after saving!");
-        }
-    } catch (e) {
-        console.error("Error adding/updating document to Firestore: ", e);
-    }
+        // Final "Save and Finish" button handler
+        if (target.classList.contains("save-button")) {
+            const data = gatherAllData();
 
-    displaySummary(data);
-}
+            const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
+            let docRef;
+
+            try {
+                if (currentUser && currentUser.uid) {
+                    // User is logged in. Use setDoc with their uid to create/update doc
+                    docRef = doc(db, "profiles", currentUser.uid);
+                    await setDoc(docRef, data, { merge: true });
+                    console.log("Document successfully written/updated for user:", currentUser.uid);
+                } else {
+                    // No user logged in, add a new doc
+                    docRef = await addDoc(collection(db, "profiles"), data);
+                    console.log("Document successfully written to Firestore!");
+                }
+
+                // After writing data to Firestore, read it back
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const savedData = docSnap.data();
+                    console.log("Retrieved data from Firestore:", savedData);
+                    
+                    // Post the message to the window for the content script to pick up
+                    window.postMessage({ action: "dataUpdated", payload: savedData }, "*");
+                } else {
+                    console.error("No such document after saving!");
+                }
+            } catch (e) {
+                console.error("Error adding/updating document to Firestore: ", e);
+            }
+
+            displaySummary(data);
+        }
     });
 
+    // Function to Clear Form Fields
     function clearFormFields(formContainer) {
         const inputs = formContainer.querySelectorAll("input, textarea, select");
         inputs.forEach(input => {
@@ -252,7 +236,7 @@ if (target.classList.contains("save-button")) {
         });
     }
 
-    // Dynamically add entries
+    // Function to Add Education Section
     function addEducationSection(edu = {}) {
         const educationForm = document.querySelector(".education-form");
         if (!educationForm) return;
@@ -295,6 +279,7 @@ if (target.classList.contains("save-button")) {
         educationForm.appendChild(newForm);
     }
 
+    // Function to Add Experience Section
     function addExperienceSection(exp = {}) {
         const workForm = document.querySelector(".work-form");
         if (!workForm) return;
@@ -337,6 +322,7 @@ if (target.classList.contains("save-button")) {
         workForm.appendChild(newForm);
     }
 
+    // Function to Add Link Section
     function addLinkSection(link = {}) {
         const linkForm = document.querySelector(".link-form");
         if (!linkForm) return;
@@ -367,19 +353,7 @@ if (target.classList.contains("save-button")) {
         linkForm.appendChild(newForm);
     }
 
-    // Fetch data from session storage
-    let resumeData;
-    try {
-        resumeData = JSON.parse(sessionStorage.getItem("resumeData"));
-    } catch (error) {
-        console.error("Invalid JSON in sessionStorage:", error);
-        resumeData = null;
-    }
-
-    if (resumeData) {
-        populateFields(resumeData);
-    }
-
+    // Function to Populate Fields with Data
     function populateFields(data) {
         // Helper function to safely retrieve values from either old or new keys
         const getVal = (oldKey, newKey) => data[oldKey] || data[newKey] || "";
@@ -490,8 +464,8 @@ if (target.classList.contains("save-button")) {
             if (elem) elem.value = data[field.oldKey] || data[field.newKey] || "";
         });
     }
-    
 
+    // Function to Gather All Data from the Form
     function gatherAllData() {
         const data = {};
 
@@ -562,6 +536,7 @@ if (target.classList.contains("save-button")) {
         return data;
     }
 
+    // Function to Extract Education Data from an Entry
     function getEducationDataFromEntry(entry) {
         return {
             school_name: entry.querySelector("input[placeholder='Stanford University']")?.value || "",
@@ -573,6 +548,7 @@ if (target.classList.contains("save-button")) {
         };
     }
 
+    // Function to Extract Work Experience Data from an Entry
     function getWorkDataFromEntry(entry) {
         return {
             company: entry.querySelector("input[placeholder='Stripe']")?.value || "",
@@ -584,6 +560,7 @@ if (target.classList.contains("save-button")) {
         };
     }
 
+    // Function to Extract Link Data from an Entry
     function getLinkDataFromEntry(entry) {
         return {
             type: entry.querySelector("select")?.value || "",
@@ -591,6 +568,7 @@ if (target.classList.contains("save-button")) {
         };
     }
 
+    // Function to Display Summary of Data
     function displaySummary(data) {
         const profileForm = document.querySelector(".profile-form");
         const summaryView = document.querySelector(".summary-view");
@@ -659,4 +637,58 @@ if (target.classList.contains("save-button")) {
             location.reload();
         });
     }
+
+    // Function to Populate Fields from Firestore
+    const populateFieldsFromFirestore = async (userId) => {
+        try {
+            const docSnap = await getDoc(doc(db, "profiles", userId));
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                sessionStorage.setItem("resumeData", JSON.stringify(data));
+                console.log(data);
+                populateFields(data);
+            } else {
+                console.warn("No user data found in Firestore for user:", userId);
+                // User logged in but no data yet, fields remain blank until saved
+            }
+        } catch (error) {
+            console.error("Error fetching user data:", error);
+        }
+    };
+
+    // Initial Population of Fields Based on User Status
+    const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
+    if (currentUser?.uid) {
+        // User is logged in, fetch their data from Firestore
+        await populateFieldsFromFirestore(currentUser.uid);
+    } else {
+        // If user is not logged in, check if resumeData is in sessionStorage
+        let resumeData;
+        try {
+            resumeData = JSON.parse(sessionStorage.getItem("resumeData"));
+        } catch (error) {
+            console.error("Invalid JSON in sessionStorage:", error);
+            resumeData = null;
+        }
+
+        if (resumeData) {
+            populateFields(resumeData);
+        }
+    }
+
+    // Fetch data from session storage (Redundant if already handled above)
+    // Commented out to prevent duplicate calls
+    /*
+    let resumeData;
+    try {
+        resumeData = JSON.parse(sessionStorage.getItem("resumeData"));
+    } catch (error) {
+        console.error("Invalid JSON in sessionStorage:", error);
+        resumeData = null;
+    }
+
+    if (resumeData) {
+        populateFields(resumeData);
+    }
+    */
 });
