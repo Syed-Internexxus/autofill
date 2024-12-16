@@ -62,7 +62,28 @@ document.addEventListener("DOMContentLoaded", async function () {
     const sections = document.querySelectorAll(".form-section");
     const sidebarItems = document.querySelectorAll(".sidebar-item");
     const nextButtons = document.querySelectorAll(".next-button");
+    const logoutLink = document.getElementById("logout-link");
     let currentSectionIndex = 0;
+    const logout = () => {
+        // Optional: Confirm logout action
+        const confirmLogout = confirm("Are you sure you want to logout?");
+        if (!confirmLogout) return;
+    
+        // Clear all session data
+        sessionStorage.clear(); // Clears all data in sessionStorage
+        // If you're using localStorage for any data, clear it as well:
+        // localStorage.clear();
+    
+        // Redirect to index.html
+        window.location.href = "index.html";
+    };
+    
+    // Attach the logout function to the Logout link's click event
+    logoutLink.addEventListener("click", (event) => {
+        event.preventDefault(); // Prevent default link behavior
+        logout();
+    });
+
 
     function showSection(index) {
         sections.forEach((section, i) => {

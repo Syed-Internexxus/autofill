@@ -3,7 +3,7 @@ const uploadLabel = document.querySelector(".upload-text");
 const nextButton = document.getElementById("next-button");
 const manualEntry = document.querySelector(".manual-entry");
 const loader = document.getElementById("loader"); // Select the loader element
-
+const logoutLink = document.getElementById("logout-link");
 // Function to hide the loader
 const hideLoader = () => {
     loader.style.transition = 'opacity 0.5s ease';
@@ -13,6 +13,25 @@ const hideLoader = () => {
     }, 500); // Match the transition duration
 };
 
+const logout = () => {
+    // Optional: Confirm logout action
+    const confirmLogout = confirm("Are you sure you want to logout?");
+    if (!confirmLogout) return;
+
+    // Clear all session data
+    sessionStorage.clear(); // Clears all data in sessionStorage
+    // If you're using localStorage for any data, clear it as well:
+    // localStorage.clear();
+
+    // Redirect to index.html
+    window.location.href = "index.html";
+};
+
+// Attach the logout function to the Logout link's click event
+logoutLink.addEventListener("click", (event) => {
+    event.preventDefault(); // Prevent default link behavior
+    logout();
+});
 // Hide the loader once the DOM is fully loaded
 document.addEventListener("DOMContentLoaded", () => {
     hideLoader();
