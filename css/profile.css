@@ -154,6 +154,6 @@ body {
 
 /* Loader GIF */
 .loader-gif {
-    width: 100px; /* Adjust size as needed */
-    height: 100px; /* Adjust size as needed */
+    width: 300px; /* Adjust size as needed */
+    height: 300px; /* Adjust size as needed */
 }
